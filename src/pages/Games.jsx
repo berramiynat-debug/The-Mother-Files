@@ -14,11 +14,11 @@ import Reaction from '../features/games/Reaction.jsx';
 import Playbook from '../features/games/Playbook.jsx';
 
 const catalog = [
-  ['playbook', NotebookPen, 'The Playbook', 'Five decisions shape a night at the booth.'],
-  ['narrator', Quote, 'The Unreliable Narrator', 'Match recovered lines to the person who said them.'],
-  ['identity', Fingerprint, 'Identity Crisis', 'Put a real name to an alias. Look out for Swarley.'],
-  ['episode', Clapperboard, 'Guess the Episode', 'Ten TVmaze clues from the episode archive.'],
-  ['reaction', Timer, 'Slap Bet', 'A timing game for quick fingers and questionable bets.'],
+  ['playbook', NotebookPen, 'The Playbook', 'I left you five decisions from a night at the booth. Barney can make all five sound urgent.'],
+  ['narrator', Quote, 'The Unreliable Narrator', 'Figure out who said what before I accidentally give myself credit again.'],
+  ['identity', Fingerprint, 'Identity Crisis', 'Match the nicknames to my friends. If in doubt, remember who liked making business cards.'],
+  ['episode', Clapperboard, 'Guess the Episode', 'I saved stills from some of our nights. See if you can match ten of them.'],
+  ['reaction', Timer, 'Slap Bet', 'Test your reflexes. Your uncle Marshall would like you to read the rules first.'],
 ];
 
 function EpisodeQuiz() {
@@ -118,7 +118,7 @@ export default function Games() {
   const Screen = Object.hasOwn(screens, game) ? screens[game] : null;
   return <section className="wrap page">
     {meta && <Link className="back-link" to="/games">‹ All games</Link>}
-    <PageHeading eyebrow="Archive arcade" title={meta?.[2] ?? 'The game room.'} description={meta?.[3] ?? 'Test your memory, take a chance, or spend an evening at the booth.'} />
+    <PageHeading eyebrow="Archive arcade" title={meta?.[2] ?? 'The game room.'} description={meta?.[3] ?? 'I tried to make a case file with no games in it. I shouldn’t have asked Barney to proofread.'} />
     {Screen ? <Screen key={game} /> : <div className="game-catalog grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {catalog.map(([id, Icon, title, description]) => <Link className="game-tile" key={id} to={'/games?game=' + id}><Icon size={27} /><h2>{title}</h2><p>{description}</p><span><Gamepad2 size={16} /> Play</span></Link>)}
     </div>}

@@ -20,6 +20,9 @@ describe('games and story', () => {
   });
   it('validates a restored story and gates all four endings', () => {
     expect(beginCase({ stage: 9 })).toBe(firstInvestigation);
+    const oldSave = { stage: 2, responses: ['Earlier testimony'], combined: false, ending: '' };
+    expect(beginCase(oldSave)).toEqual({ ...oldSave, role: '' });
+    expect(beginCase({ ...oldSave, role: 'questions' }).role).toBe('questions');
     expect(decodeLabel('09/19')).toBe(true);
     expect(decodeLabel('19/09')).toBe(false);
     expect(canCombine(secretMemories.slice(1))).toBe(false);

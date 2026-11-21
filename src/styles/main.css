@@ -223,6 +223,18 @@ progress::-webkit-progress-value { background: var(--gold); }
 .chapter-list li[aria-current] { border-color: #897348; color: var(--gold); background: #2b2a23; }
 .chapter-list svg { flex: none; }
 .story-panel { margin-top: 0; }
+.case-sidebar > .eyebrow { margin-bottom: 10px; }
+.case-role { margin-top: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
+.case-dialogue { margin: 14px 0; padding: 13px 16px; border: 1px solid #343a46; border-left: 3px solid #718b9e; border-radius: 0 7px 7px 0; background: #172531; }
+.case-dialogue.case-recording { border-left-color: #cda766; background: #252721; }
+.case-dialogue figcaption { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; color: #c7dbe7; font-size: .81rem; font-weight: 750; }
+.case-recording figcaption { color: #f3ca83; }
+.case-dialogue blockquote { margin: 0; color: var(--paper); font: inherit; text-wrap: pretty; }
+.role-picker { min-width: 0; margin-top: 18px; }
+.role-picker legend { font-weight: 700; color: var(--paper); }
+.role-choice { display: grid; align-content: start; gap: 4px; }
+.role-choice span { color: var(--muted); font-size: .9rem; }
+.role-choice:not(:disabled):hover span { color: var(--paper); }
 .story-panel .eyebrow { display: flex; align-items: center; gap: 7px; }
 .note { margin-block: 12px; padding: 11px 13px; border-left: 3px solid #bc995a; background: #262923; border-radius: 0 6px 6px 0; color: #eddfc8 !important; }
 .decode-form, .integrity-form { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
@@ -348,6 +360,8 @@ th { color: var(--gold); font-size: .88rem; }
   .detail-portrait, .portrait-frame { max-width: 210px; }
   .detail-meta { gap: 11px 18px; }
   .story-layout { grid-template-columns: 1fr; gap: 13px; }
+  .story-page .page-heading { margin-bottom: 22px; }
+  .case-sidebar { grid-row: 2; }
   .chapter-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .chapter-list li { font-size: .81rem; padding: 7px; }
   .choice-grid, .flow { grid-template-columns: 1fr; }

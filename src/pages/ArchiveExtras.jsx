@@ -55,7 +55,7 @@ export function Collection() {
   const count = memories.filter((item) => state.unlocked.includes(item.id)).length;
   const pct = Math.round(count / memories.length * 100);
   return <section className="wrap page">
-    <PageHeading eyebrow="Local archive" title="Recovered memories." description="Every discovery, witness, and stray detail that made it back into the file." />
+    <PageHeading eyebrow="Local archive" title="Recovered memories." description="This is your folder now, kids. Keep the clues you found. Mine’s the one with six separate tabs for rain." />
     <div className="panel completion"><p><strong>{count} / {memories.length}</strong> recovered <span>{pct}%</span></p><progress aria-label="Memory collection completion" value={count} max={memories.length} /></div>
     <div className="memory-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{memories.map((item) => {
       const found = state.unlocked.includes(item.id);
@@ -94,7 +94,7 @@ export function Sources() {
   ];
 
   return <section className="wrap page">
-    <PageHeading eyebrow="Engineering & credits" title="Archive integrity." description="Inspect where the data came from, which services responded, and what happens when records disagree." />
+    <PageHeading eyebrow="Engineering & credits" title="Archive integrity." description="Here’s where I got the records. When two sources disagree, check who actually keeps the original credit." />
     <div className="grid md:grid-cols-2 gap-4 source-grid">
       {providers.map(([name, purpose, url, rights], index) => <article className="panel source" key={name}>
         <span className={'health ' + (status[index] === 'Healthy' ? 'healthy' : '')}><Radio size={14} /> {status[index]}</span>
@@ -126,7 +126,7 @@ export function About() {
   return <section className="wrap page">
     <PageHeading eyebrow="SE 3355 · Web Programming" title="About the archive." description="An interactive wiki and an original, unofficial How I Met Your Mother mystery." />
     <div className="panel"><Umbrella size={29} /><h2>One show, two ways in.</h2>
-      <p>Browse the TVmaze records for the series, or follow an original story about an archive whose memories no longer agree. The series archive is available from the start.</p>
+      <p>Browse the TVmaze series records or play an original story as one of Ted’s children. Ted narrates the investigation, and your sibling helps you check his version against the evidence.</p>
       <p>This educational fan project is independent of the show’s rights holders. The original mystery, illustrations, and sounds were made for this project.</p>
       <div className="button-row"><Link className="button secondary" to="/sources">Sources and attribution</Link><Link className="button secondary" to="/story">The missing umbrella</Link></div>
     </div><Ambiguity />

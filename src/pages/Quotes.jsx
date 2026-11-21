@@ -37,7 +37,7 @@ export default function Quotes() {
   }
 
   return <section className="wrap page">
-    <PageHeading eyebrow="Audio transcript archive" title="Recovered lines." description="Short, community-sourced quotations. Season and episode details appear when the source supplies them.">
+    <PageHeading eyebrow="Audio transcript archive" title="Recovered lines." description="I remember most of the punch lines. Use the transcript to check who actually said them. Season and episode details appear when the source supplies them.">
       <Link className="button secondary" to="/games?game=narrator">Play Quote Detective</Link>
     </PageHeading>
     <Status resource={resource}>

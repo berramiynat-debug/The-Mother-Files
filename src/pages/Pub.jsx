@@ -17,9 +17,9 @@ function Telephone() {
   const [message, setMessage] = useState('');
   const { unlock, chime } = useArchive();
   const speak = (line) => { setMessage(line); unlock('telephone'); chime(); };
-  return <><p>Ted has called the pub from across the street. He needs a way to introduce himself to the person sketching by the window.</p>
-    <div className="choice-grid"><button className="choice" onClick={() => speak('Ted asks what they’re drawing. Twenty minutes later, they’re both making a map of the neighborhood.')}>Ask about the sketch</button>
-      <button className="choice" onClick={() => speak('Ted offers to judge a booth design contest. The stranger hands him a pencil and tells him to enter.')}>Pitch a booth design contest</button></div>
+  return <><p>Dad’s old recording starts with a phone call. He’s across the street, overthinking how to introduce himself to the person sketching by the window. What advice do you give him?</p>
+    <div className="choice-grid"><button className="choice" onClick={() => speak('Dad asks about the sketch. Twenty minutes later, they’re making a map of the neighborhood. Your sibling points out that this is still technically him introducing himself.')}>Ask about the sketch</button>
+      <button className="choice" onClick={() => speak('Dad announces a booth design contest. The stranger hands him a pencil and tells him to enter. Dad spends the next half hour specifying the seat depth.')}>Pitch a booth design contest</button></div>
     {message && <p className="note" aria-live="polite">{message}</p>}</>;
 }
 
@@ -34,7 +34,7 @@ function Jukebox() {
       setResult({ loading: false, text: quoteIsSafe(row, state.spoilers) ? '“' + row.line + '” — ' + row.author + ' · ' + row.source : 'This track has no episode date and is sealed in spoiler-safe mode.' });
     } catch { setResult({ loading: false, text: 'The jukebox could not recover a line. Choose another track.' }); }
   };
-  return <><p>Play an original chime and sample a short line from the community archive.</p>
+  return <><p>I saved a few voices in the jukebox. Pick a track for a chime and a short line from the community archive.</p>
     <div className="button-row"><button className="button primary" disabled={result.loading} onClick={play}>{result.loading ? 'Tuning…' : 'Play a random track'}</button>
       <button className="button secondary" aria-pressed={state.sound} onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? 'Mute jukebox' : 'Enable chime'}</button></div>
     {result.text && <p className="note" aria-live="polite">{result.text}</p>}</>;
@@ -63,9 +63,9 @@ function Notebook() {
 
 function Booth() {
   const [message, setMessage] = useState('');
-  return <><p>Lily saved the corner table. She’s been waiting to see which object you’d ask about first.</p>
-    <div className="choice-grid"><button className="choice" onClick={() => setMessage('Lily: “The photo went into a drawer. Try the date on the oldest season file.”')}>Ask about the photograph</button>
-      <button className="choice" onClick={() => setMessage('Lily: “The umbrella had a lost-and-found tag. Check the street outside the archive.”')}>Ask about the umbrella</button></div>
+  return <><p>Aunt Lily saved the corner table. Your sibling has already checked the seat cushions. You get to ask the questions.</p>
+    <div className="choice-grid"><button className="choice" onClick={() => setMessage('Aunt Lily: “The photo went into a drawer. Your dad likes dates with sentimental value. Start with the oldest season file.”')}>Ask about the photograph</button>
+      <button className="choice" onClick={() => setMessage('Aunt Lily: “The umbrella had a lost-and-found tag. Check the street outside the archive. He spent three paragraphs describing the rain.”')}>Ask about the umbrella</button></div>
     {message && <p className="note" aria-live="polite">{message}</p>}</>;
 }
 
@@ -80,7 +80,7 @@ export default function Pub() {
   };
   const Screen = { telephone: Telephone, jukebox: Jukebox, coaster: Coaster, notebook: Notebook, booth: Booth }[object];
   return <section className="wrap page pub-page">
-    <PageHeading eyebrow="MacLaren’s · Original interactive fiction" title="After dark." description="The bar is still open. Pick an object to see what the last patrons left behind." />
+    <PageHeading eyebrow="MacLaren’s · Original interactive fiction" title="After dark." description="Kids, this was our booth. I saved a little of the place in the archive. Try the phone, the notebook, or anything your aunt Lily would tell you to put back." />
     <div className="pub-scene">
       <img src="/pub.webp" alt="A warmly lit neighborhood pub with a wall telephone, jukebox, and corner booth" />
       {objects.map(([id, title, Icon, x, y]) => <button className="scene-spot" key={id} aria-label={title} aria-pressed={object === id}
@@ -89,7 +89,7 @@ export default function Pub() {
     <div className="chip-row pub-tools">{objects.map(([id, title, Icon]) => <button key={id} className="tag" aria-pressed={object === id} onClick={() => onSelect(id)}><Icon size={15} /> {title}</button>)}</div>
     <section className="panel"><p className="eyebrow">Behind the bar</p><h2>{active[1]}</h2>
       {Screen && <Screen key={object} />}
-      {object === 'envelope' && <><p className="note">The seal breaks cleanly. The note inside says to look under the booth for a locked drawer.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
+      {object === 'envelope' && <><p className="note">The seal breaks cleanly. The note says to look under the booth for a locked drawer. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
       {object === 'suitcase' && <><p>{envelope ? 'Inside, you find a notebook full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
         {envelope && <Link to="/games?game=playbook" className="button primary">Open the Playbook</Link>}</>}
     </section>

@@ -28,6 +28,6 @@
 - **Seasons** — select the first air date on the timeline.
 - **Evidence Board** — pull the loose thread.
 - **Sources** — enter 3355 to recover the technical annex.
-- **The Mystery** — interview a witness, use the pilot’s date (`0919`) for the drawer, and certify the TVmaze credit in the identity stage. Choose among three ordinary endings. To access the secret ending, combine the photograph, envelope, loose thread, umbrella, and horn in the last stage. Replay earlier endings with **Try another ending**.
+- **The Mystery** — pick a role with your sibling, question Dad or Aunt Lily, use the pilot’s date (`0919`) for the drawer, and certify the TVmaze credit in the identity stage. Choose among three ordinary endings. To access the secret ending, combine the photograph, envelope, loose thread, umbrella, and horn in the last stage. Replay earlier endings with **Try another ending**.
 
 </details>

@@ -34,14 +34,14 @@ function PeopleListing({ mode, title, description }) {
   </section>;
 }
 
-export const Characters = () => <PeopleListing mode="characters" title="Character dossiers." description="The people Ted couldn’t tell the story without." />;
-export const Cast = () => <PeopleListing mode="cast" title="The cast." description="The actors behind the series and the characters they played." />;
+export const Characters = () => <PeopleListing mode="characters" title="Character dossiers." description="These are the people who turned a quick drink into a nine-year scheduling problem." />;
+export const Cast = () => <PeopleListing mode="cast" title="The cast." description="Kids, use the cast credits if a name in my files sounds suspicious. Especially if Barney supplied it." />;
 
 export function Seasons() {
   const seasons = useResource('seasons', tvmazeService.seasons);
   const { state, unlock } = useArchive();
   return <section className="wrap page">
-    <PageHeading eyebrow="Series archive" title="The timeline." description="Follow the series from the first night to the last." />
+    <PageHeading eyebrow="Series archive" title="The timeline." description="I remember most of these nights. For the actual dates, trust the timeline." />
     <Status resource={seasons}>
       {seasons.data?.length ? <div className="timeline">
         {[...seasons.data].sort((a, b) => a.number - b.number).map((row) => <article className="timeline-entry" key={row.id}>
@@ -77,7 +77,7 @@ export function Episodes() {
   const random = rows.filter((row) => state.spoilers || !protectedEpisode(row));
   const change = (setter) => (value) => { setter(value); setLimit(12); };
   return <section className="wrap page">
-    <PageHeading eyebrow="Series archive" title="Episode archive." description="Search the original air dates, titles, and summaries. Keep your favorites for later.">
+    <PageHeading eyebrow="Series archive" title="Episode archive." description="Find the night you’re thinking of by title, season, or the detail you remember. I’m curious which ones you’ll put in your favorites.">
       <button className="button secondary" disabled={!random.length} onClick={() => navigate('/episodes/' + random[Math.floor(Math.random() * random.length)].id)}><Dice5 size={18} /> Random episode</button>
     </PageHeading>
     <div className="filter-bar episode-filters">

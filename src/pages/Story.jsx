@@ -1,23 +1,39 @@
 import { useState } from 'react';
-import { Fingerprint, FolderOpen, LockKeyhole, Umbrella } from 'lucide-react';
+import { Fingerprint, FolderOpen, LockKeyhole, Mic, NotebookPen, Umbrella } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeading, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { himymArchiveService } from '../services/providers/himymArchiveService.js';
 import { beginCase, canClose, canCombine, conclusions, decodeLabel, firstInvestigation, secretMemories } from '../features/story/logic.js';
+import { chapters, roles, witnesses } from '../data/investigation.js';
 import { memories } from '../data/memories.js';
 
-const chapters = ['The corrupted memory', 'The missing photograph', 'Conflicting identities', 'The umbrella revelation'];
+function Dialogue({ speaker, children, recording = false }) {
+  return <figure className={'case-dialogue ' + (recording ? 'case-recording' : '')}>
+    <figcaption>{recording ? <Mic size={15} aria-hidden="true" /> : <NotebookPen size={15} aria-hidden="true" />} {speaker}</figcaption>
+    <blockquote>{children}</blockquote>
+  </figure>;
+}
+
+function RolePicker({ onSelect }) {
+  return <fieldset className="role-picker">
+    <legend>You and your sibling are on the couch. Who does what?</legend>
+    <div className="choice-grid">
+      {Object.entries(roles).map(([id, role]) => <button key={id} className="choice role-choice" onClick={() => onSelect(id)}>
+        <strong>{role.title}</strong><span>{role.description}</span>
+      </button>)}
+    </div>
+  </fieldset>;
+}
 
 function Corrupted({ progress, respond, advance }) {
-  const response = progress.responses[0];
+  const response = typeof progress.responses[0] === 'string' ? progress.responses[0] : '';
+  const testimony = Object.hasOwn(witnesses, response) ? witnesses[response] : { speaker: 'Earlier testimony', line: response };
   return <>
-    <p>At 12:01 a.m. someone changed a character record and erased a photograph. Ted is waiting beside the terminal.</p>
-    {!response ? <div className="choice-grid">
-      <button className="choice" onClick={() => respond(0, 'Ted: “Follow the date. I wrote it on the first file, back when I thought the story would be short.”')}>Ask Ted about the timestamp</button>
-      <button className="choice" onClick={() => respond(0, 'Lily: “Start with the earliest air date. It’s the only label the archive hasn’t managed to lose.”')}>Ask Lily to check the archive</button>
-    </div> : <p className="note">{response}</p>}
+    {response ? <Dialogue speaker={testimony.speaker}>{testimony.line}</Dialogue> : <div className="choice-grid">
+      {Object.entries(witnesses).map(([id, witness]) => <button key={id} className="choice" onClick={() => respond(0, id)}>{witness.choice}</button>)}
+    </div>}
     <div className="button-row"><Link className="button secondary" to="/evidence">Check the evidence board</Link>
       <button className="button primary" disabled={!response} onClick={advance}>Follow the timestamp</button></div>
   </>;
@@ -29,12 +45,12 @@ function Photograph({ advance }) {
   const [feedback, setFeedback] = useState('');
   const photo = state.unlocked.includes('photo');
   return <>
-    <p>The drawer below the booth is stamped with a four-digit code. The note says to use the month and day of the first air date.</p>
+    <p>A note beneath the lock reads <em>Month and day. Start where the story starts.</em></p>
     <div className="button-row"><Link className="button secondary" to="/seasons">Inspect the timeline</Link><Link className="button secondary" to="/pub">Visit MacLaren’s</Link></div>
     <form className="decode-form" onSubmit={(event) => {
       event.preventDefault();
-      if (decodeLabel(value)) { unlock('photo'); setFeedback('The drawer opens. The photograph shows a familiar corner booth.'); }
-      else setFeedback('The lock clicks twice and stays shut. Use month, then day.');
+      if (decodeLabel(value)) { unlock('photo'); setFeedback('The drawer opens. Your sibling holds up a print of the corner booth. The handwriting on the back looks familiar.'); }
+      else setFeedback('Two clicks, no luck. Your sibling taps the note: month, then day.');
     }}>
       <label className="field-label">Drawer code <input type="text" value={value} onChange={(event) => setValue(event.target.value)} placeholder="MMDD" maxLength={5} inputMode="numeric" required /></label>
       <button className="button secondary" type="submit">Decode</button>
@@ -50,18 +66,17 @@ function Identities({ progress, respond, advance }) {
   const conflict = inspection.data?.rows.find((row) => row.status === 'Conflict');
   const response = progress.responses[2];
   return <>
-    <p>The back of the photo references a corrupted actor field. Robin suggests checking the original cast credits before certifying it.</p>
     <Link className="text-link" to="/sources">Inspect the source comparison</Link>
     <Status resource={inspection}>
-      <p className="note">{conflict ? conflict.name + ' has conflicting metadata. Which attribution should the archive keep?' : 'Which provider owns the archive’s cast attribution?'}</p>
+      <p className="note">{conflict ? conflict.name + ' has conflicting metadata. Which attribution goes in your notebook?' : 'Which provider should you cite for the cast attribution?'}</p>
       {!response && <div className="choice-grid">
-        <button className="choice" onClick={() => { setInvalid(false); respond(2, 'Robin: “The record is clean. Someone moved the photo to make us check the whole story.”'); }}>
+        <button className="choice" onClick={() => { setInvalid(false); respond(2, 'verified'); }}>
           TVmaze {conflict ? '· ' + conflict.actor : 'cast credits'}
         </button><button className="choice" onClick={() => setInvalid(true)}>Community alias provider</button>
       </div>}
-      {invalid && <p role="status">The alias source contributes nicknames. Check the cast credits to verify actor names.</p>}
+      {invalid && <p role="status">Your sibling points to the cast credits. The alias file keeps track of nicknames.</p>}
     </Status>
-    {response && <p className="note">{response}</p>}
+    {response && <Dialogue speaker="Robin">You checked the credits. Good. That signature on the back look familiar? Try asking him about it before he starts another flashback.</Dialogue>}
     <button className="button primary" disabled={!response} onClick={advance}>Open the lost &amp; found</button>
   </>;
 }
@@ -76,7 +91,6 @@ function Revelation({ progress, update }) {
     chime();
   };
   return <>
-    <p>The archive’s keeper moved the umbrella and the photo out of the database when the cast entry changed. You get to decide what the restored archive remembers.</p>
     <div className="choice-grid"><button className="choice" onClick={() => close('restored')}>Restore the files to the archive</button>
       <button className="choice" onClick={() => close('published')}>Publish the witnesses’ versions</button>
       <button className="choice" onClick={() => close('sealed')}>Leave the photograph with the booth</button></div>
@@ -94,24 +108,33 @@ export default function Story() {
   const progress = beginCase(state.story);
   const update = (changes) => set('story', (current) => ({ ...beginCase(current), ...changes }));
   const advance = () => update({ stage: Math.min(progress.stage + 1, chapters.length - 1) });
-  const respond = (index, text) => {
+  const respond = (index, answer) => {
     const responses = [...progress.responses];
-    responses[index] = text;
+    responses[index] = answer;
     update({ responses });
   };
   const ending = conclusions[progress.ending];
+  const chapter = chapters[progress.stage];
+  const siblingNote = progress.role && chapter[progress.role];
   return <section className="wrap page story-page">
-    <PageHeading eyebrow="Original interactive fiction · 2030" title="The missing umbrella." description="Someone has changed Ted’s archive. Trace their steps through the files, the pub, and the city after midnight." />
+    <PageHeading eyebrow="Ted’s living room · 2030" title="The missing umbrella." description="Dad handed you and your sibling the archive. One picture is missing and his story has a hole in it. For once, he’s letting you ask the questions." />
     <div className="story-layout">
-      <ol className="chapter-list" aria-label="Investigation progress">{chapters.map((chapter, index) => <li key={chapter} aria-current={progress.stage === index ? 'step' : undefined}>
-        {index > progress.stage ? <LockKeyhole size={17} /> : <FolderOpen size={17} />} <span>{chapter}</span></li>)}</ol>
+      <aside className="case-sidebar" aria-label="Family case notes">
+        <p className="eyebrow">Your case notes</p>
+        <ol className="chapter-list" aria-label="Investigation progress">{chapters.map(({ title }, index) => <li key={title} aria-current={progress.stage === index && !ending ? 'step' : undefined}>
+          {index > progress.stage ? <LockKeyhole size={17} /> : <FolderOpen size={17} />} <span>{title}</span></li>)}</ol>
+        {progress.role && <p className="case-role">Your role · {roles[progress.role].title}</p>}
+      </aside>
       <div className="panel story-panel">
-        {ending ? <div className="game-result"><Umbrella size={35} /><p className="eyebrow">Case closed</p><h2>{ending[0]}</h2><p>{ending[1]}</p>
+        {ending ? <div className="game-result"><Umbrella size={35} /><p className="eyebrow">Case closed</p><h2>{ending[0]}</h2>
+          <Dialogue speaker="Dad’s last recording" recording>{ending[1]}</Dialogue>
           <div className="button-row"><button className="button secondary" onClick={() => update({ ending: '' })}>Try another ending</button>
             <button className="button secondary" onClick={() => set('story', firstInvestigation)}>Restart investigation</button></div>
         </div> : <>
-          <p className="eyebrow"><Fingerprint size={17} /> Stage {progress.stage + 1} of {chapters.length}</p><h2>{chapters[progress.stage]}</h2>
-          {progress.stage === 0 && <Corrupted progress={progress} respond={respond} advance={advance} />}
+          <p className="eyebrow"><Fingerprint size={17} /> Stage {progress.stage + 1} of {chapters.length}</p><h2>{chapter.title}</h2>
+          <Dialogue speaker="Dad’s recording" recording>{chapter.recording}</Dialogue>
+          {siblingNote ? <Dialogue speaker="Your sibling">{siblingNote}</Dialogue> : <RolePicker onSelect={(role) => update({ role })} />}
+          {progress.stage === 0 && (progress.role || progress.responses[0]) && <Corrupted progress={progress} respond={respond} advance={advance} />}
           {progress.stage === 1 && <Photograph advance={advance} />}
           {progress.stage === 2 && <Identities progress={progress} respond={respond} advance={advance} />}
           {progress.stage === 3 && <Revelation progress={progress} update={update} />}

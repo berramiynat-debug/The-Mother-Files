@@ -4,12 +4,12 @@ import { useArchive } from '../context/archiveContext.js';
 import { Modal } from './UI.jsx';
 
 const frames = [
-  ['The year is 2030.', 'Ted Mosby’s memory archive is starting up.'],
-  ['Nine seasons indexed.', 'Reconstructing the regulars, the booth, and a lifetime of questionable decisions.'],
+  ['Kids, it’s 2030.', 'I put the whole story in an archive. Yes, all of it.', 2900],
+  ['Nine seasons indexed.', 'I said I’d keep it short. I didn’t say compared to what.', 3000],
   ['Legen—', 'Wait for it…', 1700],
   [<>Legen<em>dary!</em></>, '', 1200],
-  ['Three files are missing.', 'A name has changed. A photograph is gone. The yellow umbrella never made it home.'],
-  ['Someone moved them.', 'Find the missing memories before the archive writes a story of its own.'],
+  ['Two things are missing.', 'The booth photo. The yellow umbrella. And somebody changed a name in my files.', 3500],
+  ['Your turn, kids.', 'The booth photo and yellow umbrella are missing. Can you and your sibling find them?'],
 ];
 
 const lastStep = frames.length - 1;
@@ -26,7 +26,7 @@ export default function Intro() {
   return <Modal title="The Memory Glitch" className="intro" onClose={finishIntro}>
     <div className="intro-inner">
       <Umbrella className="intro-umbrella" size={70} strokeWidth={1.1} />
-      <p className="eyebrow">Memory Archive · Startup Sequence</p>
+      <p className="eyebrow">Dad’s archive · Living room, 2030</p>
       <div aria-live="polite" aria-atomic="true">
         <div key={step} className="intro-frame"><h2>{title}</h2>{description && <p>{description}</p>}</div>
       </div>

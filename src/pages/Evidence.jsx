@@ -21,11 +21,11 @@ export default function Evidence() {
   function connect() {
     if (selected.length !== 3) return;
     set('connections', (items) => items.includes(season) ? items : [...items, season]);
-    setNote('The connection is saved. Check the air date for the drawer code.');
+    setNote(season === 1 ? 'The connection is saved. Your sibling circles the air date for the drawer code.' : 'The connection is saved. The drawer clue is in the first season’s file.');
   }
 
   return <section className="wrap page">
-    <PageHeading eyebrow="Investigation workspace" title="The evidence board." description="Pin a date, an episode, and a witness to a single thread. The witness assignments are part of the original mystery." />
+    <PageHeading eyebrow="Investigation workspace" title="The evidence board." description="Kids, pin a date, an episode, and a witness to the thread. If I start explaining why I bought the corkboard, you have my permission to keep going." />
     <Status resource={result}>
       {!row ? <Empty title="No evidence to pin" /> : <>
         <label className="field-label game-filter">Open a season file <select value={season} onChange={(event) => { setSeason(Number(event.target.value)); setSelected([]); setNote(''); }}>
@@ -46,7 +46,7 @@ export default function Evidence() {
         <div className="button-row evidence-actions"><button className="button primary" disabled={selected.length !== 3} onClick={connect}><Link2 size={18} /> Connect the records</button>
           <Link className="button secondary" to="/story">Return to the case</Link></div>
         {(note || connected) && <p className="note" role="status">{note || 'This season thread is connected.'}</p>}
-        <p className="credit">Episode, date, and character records supplied by TVmaze</p>
+        <p className="credit">Episode, date, and character records supplied by TVmaze. Witness assignments are part of the original mystery.</p>
       </>}
     </Status>
   </section>;
