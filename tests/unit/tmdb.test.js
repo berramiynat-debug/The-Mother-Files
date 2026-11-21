@@ -29,3 +29,14 @@ it('handles an upstream rejection without leaking the response body', async () =
   expect(response.status).toBe(502);
   expect(JSON.stringify(response)).not.toMatch(/Untrusted response|mock-api-key/);
 });
+
+it('does not follow an upstream redirect or return its destination', async () => {
+  const fetcher = vi.fn(async () => new Response(null, {
+    status: 302, headers: { Location: 'https://another.example/redirect' },
+  }));
+  const response = await tmdbResponse('GET', '/api/tmdb?resource=season&season=2', { TMDB_API_KEY: 'mock-api-key' }, fetcher);
+  expect(fetcher.mock.calls[0][1].redirect).toBe('manual');
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(response.body.upstreamStatus).toBe(302);
+  expect(JSON.stringify(response)).not.toContain('another.example');
+});

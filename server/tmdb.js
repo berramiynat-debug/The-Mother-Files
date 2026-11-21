@@ -31,7 +31,7 @@ const json = (status, body) => ({
   headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': status === 200 ? 'public, max-age=300, s-maxage=86400' : 'no-store', 'X-Content-Type-Options': 'nosniff' },
 });
 
-export async function tmdbResponse(method, requestUrl, env, fetcher = fetch) {
+export async function tmdbResponse(method, requestUrl, env, fetcher = (url, options) => globalThis.fetch(url, options)) {
   if (method !== 'GET') return { ...json(405, { error: 'GET required.' }), headers: { Allow: 'GET', ...json(405).headers } };
   const target = endpoint(new URL(requestUrl, 'http://localhost').searchParams);
   if (!target) return json(400, { error: 'Unknown TMDB route or arguments.' });
@@ -44,9 +44,12 @@ export async function tmdbResponse(method, requestUrl, env, fetcher = fetch) {
   const url = new URL(base + target.suffix);
   if (!bearer) url.searchParams.set('api_key', key);
   const action = (async () => {
+    const controller = new AbortController();
+    const deadline = setTimeout(() => controller.abort(), 5500);
     try {
-      const response = await fetcher(url, {
-        signal: AbortSignal.timeout(5500), redirect: 'error',
+      const response = await fetcher(url.href, {
+        // Workers support manual redirects. The status check rejects every redirect.
+        signal: controller.signal, redirect: 'manual',
         headers: bearer ? { Authorization: 'Bearer ' + bearer, Accept: 'application/json' } : { Accept: 'application/json' },
       });
       if (!response.ok) return json(502, { error: 'TMDB is temporarily unavailable.', upstreamStatus: response.status });
@@ -57,6 +60,8 @@ export async function tmdbResponse(method, requestUrl, env, fetcher = fetch) {
       return result;
     } catch {
       return json(502, { error: 'TMDB did not respond.' });
+    } finally {
+      clearTimeout(deadline);
     }
   })();
   pending.set(target.suffix, action);
