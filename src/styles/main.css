@@ -284,6 +284,7 @@ th { color: var(--gold); font-size: .88rem; }
 .intro-umbrella { display: block; margin: 0 auto 24px; color: var(--gold); animation: float 3.5s ease-in-out infinite alternate; }
 .intro-frame { min-height: 147px; animation: appear .46s ease both; }
 .intro-frame h2 { font-size: clamp(2.65rem, 7vw, 5.2rem); letter-spacing: -.04em; font-weight: 640; margin-top: 15px; }
+.intro-frame h2 em { color: var(--gold); }
 .intro-frame p { font-size: 1.12rem; color: #d9d3c8; margin: 13px auto; max-width: 42ch; }
 .intro-controls { display: flex; justify-content: center; align-items: center; gap: 9px; margin-top: 15px; }
 .toast { position: fixed; right: 18px; bottom: 18px; z-index: 70; display: flex; align-items: center; gap: 9px; max-width: calc(100% - 36px); border: 1px solid #ae8850; background: #251e1b; color: #ffe0a3; box-shadow: 0 5px 18px #0007; border-radius: 7px; padding: 12px 16px; animation: appear .22s ease both; }
