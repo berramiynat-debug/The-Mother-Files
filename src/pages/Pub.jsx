@@ -70,28 +70,40 @@ function Booth() {
 }
 
 export default function Pub() {
-  const { unlock, state } = useArchive();
+  const { unlock, set, state, notice } = useArchive();
   const [object, setObject] = useState('booth');
   const active = objects.find(([id]) => id === object);
   const envelope = state.unlocked.includes('envelope');
+  const inspected = objects.filter(([id]) => state.pubObjects.includes(id)).length;
   const onSelect = (id) => {
     setObject(id);
+    if (!state.pubObjects.includes(id)) set('pubObjects', (seen) => [...new Set([...seen, id])]);
     if (id === 'envelope') unlock('envelope');
   };
   const Screen = { telephone: Telephone, jukebox: Jukebox, coaster: Coaster, notebook: Notebook, booth: Booth }[object];
   return <section className="wrap page pub-page">
     <PageHeading eyebrow="MacLaren’s · Original interactive fiction" title="After dark." description="Kids, this was our booth. I saved a little of the place in the archive. Try the phone, the notebook, or anything your aunt Lily would tell you to put back." />
-    <div className="pub-scene">
-      <img src="/pub.webp" alt="A warmly lit neighborhood pub with a wall telephone, jukebox, and corner booth" />
-      {objects.map(([id, title, Icon, x, y]) => <button className="scene-spot" key={id} aria-label={title} aria-pressed={object === id}
-        style={{ left: x + '%', top: y + '%' }} onClick={() => onSelect(id)}><Icon size={18} /></button>)}
+    <div className="pub-explorer">
+      <div>
+        <div className="pub-scene" role="group" aria-label="Objects in MacLaren’s">
+          <img src="/pub.webp" alt="A warmly lit neighborhood pub with a wall telephone, jukebox, and corner booth" />
+          <div className="pub-spotlight" aria-hidden="true" style={{ '--pub-x': active[3] + '%', '--pub-y': active[4] + '%' }} />
+          {objects.map(([id, title, Icon, x, y]) => <button className="scene-spot" key={id} aria-label={title} aria-pressed={object === id}
+            data-inspected={state.pubObjects.includes(id)} style={{ left: x + '%', top: y + '%' }} onClick={() => onSelect(id)}><Icon size={18} aria-hidden="true" /></button>)}
+        </div>
+        <div className="pub-inspector-bar">
+          <p role="status"><strong key={object}>{active[1]}</strong><span>{inspected}/{objects.length} objects inspected</span></p>
+          <a className="text-link" href="#pub-inspector">View details</a>
+          {notice && <p className="pub-found" role="status">{notice}</p>}
+        </div>
+        <div className="chip-row pub-tools">{objects.map(([id, title, Icon]) => <button key={id} className="tag" aria-pressed={object === id} onClick={() => onSelect(id)}><Icon size={15} /> {title}</button>)}</div>
+      </div>
+      <section className="panel pub-inspector" key={object} id="pub-inspector" tabIndex={-1}><p className="eyebrow">Behind the bar</p><h2>{active[1]}</h2>
+        {Screen && <Screen />}
+        {object === 'envelope' && <><p className="note">The seal breaks cleanly. Barney has marked the envelope “For the Mosby kids.” Inside is a note about the locked drawer under the booth. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
+        {object === 'suitcase' && <><p>{envelope ? 'Inside, you find a notebook full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
+          {envelope && <Link to="/games?game=playbook" className="button primary">Open the Playbook</Link>}</>}
+      </section>
     </div>
-    <div className="chip-row pub-tools">{objects.map(([id, title, Icon]) => <button key={id} className="tag" aria-pressed={object === id} onClick={() => onSelect(id)}><Icon size={15} /> {title}</button>)}</div>
-    <section className="panel"><p className="eyebrow">Behind the bar</p><h2>{active[1]}</h2>
-      {Screen && <Screen key={object} />}
-      {object === 'envelope' && <><p className="note">The seal breaks cleanly. Barney has marked the envelope “For the Mosby kids.” Inside is a note about the locked drawer under the booth. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
-      {object === 'suitcase' && <><p>{envelope ? 'Inside, you find a notebook full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
-        {envelope && <Link to="/games?game=playbook" className="button primary">Open the Playbook</Link>}</>}
-    </section>
   </section>;
 }

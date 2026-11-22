@@ -74,6 +74,6 @@ export default function Layout() {
       </footer>
     </div>
     {intro && <Intro />}
-    {notice && <div className={location.pathname === '/story' ? 'sr-only' : 'toast'} role="status"><Archive size={19} /> {notice}</div>}
+    {notice && location.pathname !== '/pub' && <div className={location.pathname === '/story' ? 'sr-only' : 'toast'} role="status"><Archive size={19} /> {notice}</div>}
   </>;
 }

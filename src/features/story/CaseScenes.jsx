@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Coffee, FileText, Mail, NotebookPen, ShieldCheck } from 'lucide-react';
+import { Check, Coffee, FileText, LockKeyhole, Mail, NotebookPen, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useArchive } from '../../context/archiveContext.js';
 import { caseExhibits, pilotAirDate } from '../../data/investigation.js';
@@ -42,9 +42,11 @@ export function CoffeeCup({ progress, openLetter, answer, advance }) {
   </div>;
 
   return <>
-    <div className="case-ticket paper">
-      <Coffee size={22} aria-hidden="true" />
-      <div><p className="eyebrow">Coffee order · Smudged label</p><p className="coffee-mark">SWARL_Y</p></div>
+    <div className="case-unseal">
+      <div className="case-ticket paper case-unsealed-ticket">
+        <Coffee size={22} aria-hidden="true" />
+        <div><p className="eyebrow">Coffee order · Smudged label</p><p className="coffee-mark">SWARL_Y</p></div>
+      </div>
     </div>
     <BarneyNote>That cup is also a legal document. I checked with Marshall. He said to stop calling him.</BarneyNote>
     <fieldset className="case-choices">
@@ -61,23 +63,25 @@ export function MacLarensDrawer({ progress, solved, advance }) {
   const { state, unlock } = useArchive();
   const [evidence, setEvidence] = useState('');
   const [value, setValue] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const [rejected, setRejected] = useState(0);
+  const code = value.replace(/\D/g, '').slice(0, 4);
   const pilot = useResource(evidence === 'pilot' ? 'case-pilot' : null, fetchPilot);
   const apiDate = pilot.data?.date ?? '';
   const liveDate = /^\d{4}-\d{2}-\d{2}$/.test(apiDate) && Number.isFinite(Date.parse(apiDate));
   const airDate = liveDate ? apiDate : pilotAirDate;
   const photo = progress.responses[1] === 'photo' || (progress.opened === undefined && state.unlocked.includes('photo'));
 
-  if (photo) return <>
-    <Found>Drawer opened. You found the photograph.</Found>
-    <p>The photo has a fresh sign-out slip clipped to it. Two witnesses signed it. Their handwriting looks suspiciously similar.</p>
-    <button className="button primary" onClick={advance}>Read the witness slip</button>
-  </>;
+  if (photo) return <div className="case-drawer-open">
+    <figure className="case-recovered-photo" aria-hidden="true"><img src="/pub.webp" alt="" /><figcaption>Corner booth</figcaption></figure>
+    <div><Found>Drawer opened. You found the photograph.</Found>
+      <p>The photo has a fresh sign-out slip clipped to it. Two witnesses signed it. Their handwriting looks suspiciously similar.</p>
+      <button className="button primary" onClick={advance}>Read the witness slip</button></div>
+  </div>;
 
   function decode(event) {
     event.preventDefault();
     if (decodeLabel(value, airDate)) { unlock('photo'); solved(); }
-    else setFeedback('The drawer stays shut. Use the Pilot’s month and day, in that order.');
+    else setRejected((previous) => previous + 1);
   }
 
   return <>
@@ -93,11 +97,16 @@ export function MacLarensDrawer({ progress, solved, advance }) {
     </div>}
     {evidence === 'pineapple' && <p className="case-feedback" role="status">A note from Lily: “I have no idea how this got back in here. For the lock, try the Pilot card.”</p>}
     <form className="decode-form case-lock" onSubmit={decode}>
-      <label className="field-label">Drawer code <input type="text" value={value} onChange={(event) => setValue(event.target.value)} placeholder="MMDD" maxLength={5} inputMode="numeric" autoComplete="off" required /></label>
+      <div key={rejected} className={'case-dials' + (rejected ? ' is-jammed' : '')} aria-hidden="true">
+        <LockKeyhole size={18} />
+        {[0, 1, 2, 3].map((slot) => <span key={slot} className="case-dial"><span key={code[slot] ?? 'empty'}>{code[slot] ?? '–'}</span></span>)}
+      </div>
+      <label className="field-label">Drawer code <input type="text" value={value} onChange={(event) => { setValue(event.target.value); setRejected(0); }}
+        aria-invalid={rejected ? true : undefined} aria-describedby={rejected ? 'drawer-help drawer-error' : 'drawer-help'} placeholder="MMDD" maxLength={5} inputMode="numeric" autoComplete="off" required /></label>
       <button className="button primary" type="submit">Unlock drawer</button>
-      <p>Enter the month and day as four digits. March 7 would be 0307.</p>
+      <p id="drawer-help">Enter the month and day as four digits. March 7 would be 0307.</p>
     </form>
-    {feedback && <p className="case-feedback" role="status">{feedback}</p>}
+    {rejected > 0 && <p className="case-feedback" id="drawer-error" role="status">The drawer stays shut. Use the Pilot’s month and day, in that order.</p>}
     <BarneyNote label="Barney’s note under the booth">For the record, I object to the pineapple being called as a witness. It was present at a completely different incident.</BarneyNote>
   </>;
 }
@@ -167,7 +176,7 @@ export function Finale({ progress, update }) {
 
 export function CaseCompleted({ ending, onChooseAgain, onRestart }) {
   return <div className="game-result">
-    <p className="eyebrow"><ShieldCheck size={17} aria-hidden="true" /> Case closed</p>
+    <p className="eyebrow case-closed-stamp"><ShieldCheck size={17} aria-hidden="true" /> Case closed</p>
     <h2>{ending[0]}</h2>
     <figure className="case-dialogue case-recording"><figcaption>Dad’s last recording</figcaption><blockquote>{ending[1]}</blockquote></figure>
     <div className="button-row">

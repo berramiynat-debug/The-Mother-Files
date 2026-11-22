@@ -3,12 +3,12 @@ import { ArchiveContext } from './archiveContext.js';
 import { memories } from '../data/memories.js';
 
 const storageKey = 'mother-files-v1';
-const defaults = { unlocked: [], favorites: [], sound: false, spoilers: false, introSeen: false, story: null, aliases: [], connections: [], wall: [] };
+const defaults = { unlocked: [], favorites: [], sound: false, spoilers: false, introSeen: false, story: null, aliases: [], connections: [], wall: [], pubObjects: [] };
 function restore() {
   try {
     const value = JSON.parse(localStorage.getItem(storageKey));
     const state = { ...defaults, ...value };
-    for (const key of ['unlocked', 'favorites', 'aliases', 'connections', 'wall']) {
+    for (const key of ['unlocked', 'favorites', 'aliases', 'connections', 'wall', 'pubObjects']) {
       state[key] = Array.isArray(state[key]) ? state[key] : defaults[key];
     }
     for (const key of ['sound', 'spoilers', 'introSeen']) state[key] = state[key] === true;
