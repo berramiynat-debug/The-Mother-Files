@@ -42,11 +42,15 @@ test('identity game always includes the hidden alias', async ({ page }) => {
   await expect(page.getByText(/coffee cup just made/)).toBeVisible();
 });
 
-test('quote fallback and quote game under controlled response shapes', async ({ page }) => {
+test('live quote integration uses the Character API for the archive and detective game', async ({ page }) => {
   // Invented fixture lines represent network shapes only. Production uses live GET requests.
   const characters = ['Ted Mosby', 'Barney Stinson', 'Marshall Eriksen', 'Lily Aldrin', 'Robin Scherbatsky'];
   let samples = 0;
-  await page.route('https://himym-api-ten.vercel.app/himym/quotes?*', (route) => route.fulfill({ status: 500, json: { error: 'fixture database down' } }));
+  const retiredRequests = [];
+  await page.route('https://himym-api-ten.vercel.app/**', (route) => {
+    retiredRequests.push(route.request().url());
+    return route.abort();
+  });
   await page.route('https://himym-api.vercel.app/api/quotes', (route) => {
     const index = samples++;
     return route.fulfill({ json: { quotes: 'Test-only observation ' + index + '.', author: characters[index % characters.length] } });
@@ -54,9 +58,14 @@ test('quote fallback and quote game under controlled response shapes', async ({ 
   await page.goto('/quotes');
   await expect(page.getByRole('heading', { name: 'Under seal' })).toBeVisible();
   await page.getByRole('button', { name: 'Allow spoilers' }).click();
-  await expect(page.getByText('Active provider · HIMYM Character API. The standalone archive is unavailable.')).toBeVisible();
+  await expect(page.getByText('Active provider · HIMYM Character API.', { exact: true })).toBeVisible();
   await page.getByLabel('Speaker').selectOption('Ted Mosby');
   await expect(page.getByRole('figure')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Recover more lines' }).click();
+  await expect(page.getByRole('figure')).toHaveCount(2);
+  await page.getByRole('searchbox', { name: 'Search quotes' }).fill('observation 5.');
+  await expect(page.getByRole('figure')).toHaveCount(1);
+  await expect(page.getByRole('figure')).toContainText('Test-only observation 5.');
   await page.getByRole('link', { name: 'Play Quote Detective' }).click();
   await expect(page.getByText('Round 1 / 7')).toBeVisible();
   const prompt = await page.locator('.quiz h2').textContent();
@@ -65,4 +74,7 @@ test('quote fallback and quote game under controlled response shapes', async ({ 
   await expect(page.getByText('Correct.', { exact: true })).toBeVisible();
   await page.goto('/collection');
   await expect(page.getByText(/Voice print recovered/)).toBeVisible();
+  await page.goto('/sources');
+  await expect(page.getByRole('heading', { name: 'HIMYM Character API', exact: true })).toBeVisible();
+  expect(retiredRequests).toHaveLength(0);
 });

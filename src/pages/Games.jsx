@@ -6,7 +6,6 @@ import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { protectedEpisode, protectedName, quoteIsSafe } from '../services/normalizers/records.js';
 import { himymCharacterService } from '../services/providers/himymCharacterService.js';
-import { himymQuotesService } from '../services/providers/himymQuotesService.js';
 import { tvmazeService } from '../services/providers/tvmazeService.js';
 import { buildQuestions, fold, seededRandom, synopsisClue } from '../features/games/logic.js';
 import Quiz from '../features/games/Quiz.jsx';
@@ -78,13 +77,12 @@ function IdentityQuiz() {
 function Narrator() {
   const { state } = useArchive();
   const canon = useResource('cast', tvmazeService.characters);
-  const quotes = useResource('quote-quiz', himymQuotesService.recover);
+  const quotes = useResource('quote-quiz', himymCharacterService.sampleQuotes);
   const [run, setRun] = useState(() => Math.random());
   const names = (canon.data ?? []).filter((row) => !protectedName(row.name) && row.name !== 'Narrator').map((row) => row.name);
   const questions = useMemo(() => {
     const rows = (canon.data ?? []).filter((row) => !protectedName(row.name) && row.name !== 'Narrator');
-    const safe = (quotes.data?.records ?? []).filter((row) => quoteIsSafe(row, state.spoilers));
-    const seasonOptions = [...new Set(safe.flatMap((row) => row.season ? ['Season ' + row.season] : []))];
+    const safe = (quotes.data ?? []).filter((row) => quoteIsSafe(row, state.spoilers));
     const speakerClues = safe.flatMap((row) => {
       const matched = rows.find((character) => fold(character.name) === fold(row.author) || fold(character.name.split(' ')[0]) === fold(row.author));
       if (!matched || fold(row.line).includes(fold(matched.name.split(' ')[0]))) return [];
@@ -93,17 +91,11 @@ function Narrator() {
         prompt: '“' + row.line + '”', wall: { id: row.id, author: matched.name, season: row.season },
       }];
     });
-    const random = seededRandom(run);
-    const advanced = buildQuestions(safe.filter((row) => row.season && !/\bseason\s+\d/i.test(row.line)).map((row) => ({
-      answer: 'Season ' + row.season, options: seasonOptions, label: row.source + ' · When was it?',
-      prompt: '“' + row.line + '”', wall: { id: row.id, author: row.author, season: row.season },
-    })), 2, random);
-    const advancedLines = new Set(advanced.map((row) => row.wall.id));
-    return [...buildQuestions(speakerClues.filter((row) => !advancedLines.has(row.wall.id)), 7 - advanced.length, random), ...advanced];
+    return buildQuestions(speakerClues, 7, seededRandom(run));
   }, [canon.data, quotes.data, state.spoilers, run]);
   return <Status resource={canon}><Status resource={quotes}>
     {questions.length >= 5 ? <Quiz key={run + ':' + state.spoilers} questions={questions} win="narrator" threshold={3} onReplay={() => { setRun(Math.random()); quotes.retry(); }} />
-      : !state.spoilers && quotes.data?.source === 'HIMYM Character API' ? <SpoilerLock>The backup source omits episode dates. Allow unclassified lines to play this quiz.</SpoilerLock>
+      : !state.spoilers ? <SpoilerLock>The Character API omits episode dates. Allow spoilers to play with unclassified lines.</SpoilerLock>
       : <Empty title="More voices needed"><p>{questions.length} playable lines recovered across {names.length} possible speakers. Five distinct lines are required.</p>
         <button className="button secondary" onClick={quotes.retry}>Recover more quotes</button></Empty>}
   </Status></Status>;

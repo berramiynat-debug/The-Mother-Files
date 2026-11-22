@@ -1,4 +1,4 @@
-import { BookOpen, Clapperboard, Dice5, Fingerprint, Play, Umbrella, Users, Wine } from 'lucide-react';
+import { BookOpen, Clapperboard, Dice5, Fingerprint, Music, Play, Umbrella, Users, Wine } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
@@ -53,7 +53,7 @@ export default function Home() {
         {entries.map(([url, Icon, title, copy]) => <Link to={url} key={url}><span className="index-icon"><Icon size={21} /></span><div><h3>{title}</h3><p>{copy}</p></div></Link>)}
       </div>
       <div className="home-pub"><div><p className="eyebrow">Open late</p><h2>Your booth is waiting.</h2><p>I used to leave notes in that booth. An envelope was a little formal, even for me.</p><Link to="/pub" className="button primary">Go to the pub</Link></div></div>
-      <button className="quiet-secret" title="Inspect the blue French horn" aria-label="Inspect the blue French horn" onClick={() => unlock('horn')}>♫</button>
+      <button className="quiet-secret" title="Inspect the blue French horn" aria-label="Inspect the blue French horn" onClick={() => unlock('horn')}><Music size={18} aria-hidden="true" /></button>
     </section>
   </>;
 }

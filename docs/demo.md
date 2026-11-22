@@ -8,7 +8,7 @@
 | React architecture and state | 20% | Functional components, props, hooks, shared API adapters, and an archive context for local persistence. |
 | Routing, navigation, and UI/UX | 20% | React Router details and direct refresh, responsive menu, search, filters, pagination, favorite toggles, and spoiler controls. |
 | Code quality and structure | 10% | Services, normalizers, hooks, pages, and game logic are separated. Run lint and the automated suites from the repository root. |
-| Creativity and effort | 30% | Cinematic intro, clickable MacLaren’s, a four-stage case and four endings, five mini-games, a memory gallery, and source discrepancies that affect a puzzle. |
+| Creativity and effort | 30% | Scene controls in the intro, a spotlight in MacLaren’s, five mini-games, a memory gallery, and a four-stage case that uses the TVmaze Pilot air date as a clue. The case has four endings. |
 
 ## A four-minute walkthrough
 

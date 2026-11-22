@@ -6,17 +6,14 @@ import { useArchive } from '../context/archiveContext.js';
 import { memories } from '../data/memories.js';
 import { useResource } from '../hooks/useResource.js';
 import { himymArchiveService } from '../services/providers/himymArchiveService.js';
-import { himymQuotesService } from '../services/providers/himymQuotesService.js';
 import { tmdbImage, tmdbService } from '../services/providers/tmdbService.js';
 
 const getShow = () => tmdbService('show');
 const getImages = () => tmdbService('images');
-const pingQuotes = async () => (await himymQuotesService.page()).records.length;
 const providers = [
   ['TVmaze', 'Canonical series, season, episode, actor, and character records.', 'https://www.tvmaze.com/api', 'CC BY-SA for API data. See TVmaze for its attribution and licensing terms.'],
   ['TMDB', 'Supplementary portraits, season art, episode stills, and backdrops.', 'https://www.themoviedb.org/tv/1100-how-i-met-your-mother', 'This product uses the TMDB API but is not endorsed or certified by TMDB.'],
   ['HIMYM Character API', 'Community alias and occupation records, plus short random quotes.', 'https://github.com/hrithik73/himym-api', 'Used via public GET endpoints. Cast attribution comes from TVmaze.'],
-  ['HIMYM Quotes API', 'Optional short quotation archive with reported season metadata.', 'https://github.com/Ashwin-Ash-09/himym-quotes-api', 'If its database is unavailable, the app samples the live Character API.'],
   ['MacLaren’s Pub API', 'Reviewed FastAPI reference project.', 'https://github.com/aashikmathew/himym-maclarens-api', 'The pub uses independently written fiction and chimes.'],
   ['HIMYM Archive API', 'Reviewed Flask reference project.', 'https://github.com/joshshep97/himym_api', 'The evidence board uses first-party TVmaze requests through an independent adapter.'],
 ];
@@ -26,7 +23,7 @@ function CaseFile() {
   return <section className="panel architecture">
     <p className="eyebrow">Technical annex</p><h2>Case File 3355</h2>
     <ol className="flow" aria-label="API data flow">
-      {[[Database, 'Providers', 'TVmaze supplies canon. Community services add aliases and quotations.'],
+      {[[Database, 'Providers', 'TVmaze supplies canon. The Character API adds aliases and quotations.'],
         [Server, 'TMDB proxy', 'Allowlisted routes resolve show and image data server-side.'],
         [GitBranch, 'Normalizers', 'Check types, strip HTML, deduplicate, and compare actor fields.'],
         [Archive, 'React routes', 'Resource hooks handle requests. Context stores local progress.']].map(([Icon, title, copy]) =>
@@ -84,13 +81,12 @@ export function Sources() {
   const integrity = useResource('integrity', himymArchiveService.integrity);
   const show = useResource('tmdb-show', getShow);
   const images = useResource('tmdb-images', getImages);
-  const quotes = useResource('quote-health', pingQuotes);
   const [code, setCode] = useState('');
   const [feedback, setFeedback] = useState('');
   const visual = tmdbImage(images.data?.backdrops?.[0] || show.data?.backdrop, 'w780');
   const status = [
     stateLabel(integrity), stateLabel(show), integrity.loading ? 'Checking' : integrity.data?.identityHealthy ? 'Healthy' : 'Unavailable',
-    stateLabel(quotes), 'Local reference', 'Local reference',
+    'Local reference', 'Local reference',
   ];
 
   return <section className="wrap page">

@@ -18,9 +18,9 @@ export function Picture({ src, alt = '', className = '', eager = false }) {
 }
 
 export function Status({ resource, children, label = 'Loading archive records' }) {
-  if (resource.loading) return <div aria-label={label} aria-busy="true" className="skeletons grid gap-4 md:grid-cols-3">
-    {[0, 1, 2].map((value) => <div key={value} className="skeleton" />)}
-    <span className="sr-only" role="status">{label}</span>
+  if (resource.loading) return <div role="status" className="skeletons grid gap-4 md:grid-cols-3">
+    <span className="sr-only">{label}</span>
+    {[0, 1, 2].map((value) => <div key={value} className="skeleton" aria-hidden="true" />)}
   </div>;
   if (resource.error) return <div className="state-panel" role="alert"><p className="eyebrow">{resource.error.source || 'Archive'}</p>
     <h2>Connection interrupted</h2><p>{resource.error.message}</p>

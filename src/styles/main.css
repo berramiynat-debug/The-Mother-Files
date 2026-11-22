@@ -81,7 +81,7 @@ html:has(.investigation-return) { scroll-padding-top: 48px; }
 .footer-inner nav :is(button, a):hover { color: var(--gold); }
 
 .home-hero { min-height: clamp(530px, 46vw, 690px); position: relative; isolation: isolate; background: #111922 url('/city.webp') center 59% / cover no-repeat; display: grid; align-items: center; }
-.home-hero::before { content: ''; z-index: -1; position: absolute; inset: 0; background: linear-gradient(90deg, #061019eb 0%, #10171ed1 30%, #10171e42 60%, #03101b08 100%), linear-gradient(0deg, #0a111bd9 0%, transparent 27%); }
+.home-hero::before { content: ''; z-index: -1; position: absolute; inset: 0; background: linear-gradient(90deg, #061019eb 0%, #10171ed1 42%, #10171e42 68%, #03101b08 100%), linear-gradient(0deg, #0a111bd9 0%, transparent 27%); }
 .hero-inner { padding-block: 66px 68px; }
 .hero-label { display: flex; align-items: center; gap: 10px; font-size: .77rem; }
 .hero-label span { width: 22px; height: 1px; background: var(--gold); }
@@ -110,7 +110,8 @@ html:has(.investigation-return) { scroll-padding-top: 48px; }
 .home-index h3 { font-size: 1.2rem; font-weight: 720; }
 .home-index p { color: var(--muted); font-size: .88rem; margin-top: 5px; }
 .index-icon { flex: none; display: grid; place-items: center; width: 43px; height: 43px; color: var(--gold); border: 1px solid #6e553e; border-radius: 6px; background: #2b2923; }
-.home-pub { display: grid; align-items: center; min-height: 265px; margin-top: 28px; padding: 29px; isolation: isolate; border-radius: 10px; background: linear-gradient(90deg, #151219f5, #19161890, #38271f33), url('/pub.webp') center 60% / cover; border: 1px solid #604b3d; }
+.home-pub { display: grid; align-items: center; min-height: 265px; margin-top: 28px; padding: 29px; isolation: isolate; border-radius: 10px; background: linear-gradient(90deg, #151219f5, #191618c2 65%, #38271f33), url('/pub.webp') center 60% / cover; border: 1px solid #604b3d; }
+.home-pub > div { max-width: 45ch; }
 .home-pub p:not(.eyebrow) { margin: 8px 0 17px; color: #eadac8; }
 .quiet-secret { display: inline-flex; margin-top: 17px; padding: 8px 11px; min-width: 40px; border-radius: 7px; border: 1px dashed #4e778f; background: #142a39; color: #a2d3f2; }
 .quiet-secret:hover { background: #25465a; }
@@ -421,6 +422,7 @@ th { color: var(--gold); font-size: .88rem; }
   .main-nav.is-open { display: grid; }
   .main-nav > a, .nav-more > button { justify-content: flex-start; padding-inline: 12px; width: 100%; }
   .nav-dropdown { position: static; box-shadow: none; width: 100%; margin-top: 5px; }
+  .home-hero::before { background: linear-gradient(90deg, #061019eb 0%, #10171ed9 66%, #10171e42 91%), linear-gradient(0deg, #0a111bd9 0%, transparent 27%); }
   .hero-location { right: 27px; }
   .page { padding-block: 49px 65px; }
 }
@@ -432,7 +434,7 @@ th { color: var(--gold); font-size: .88rem; }
   .site-header .brand img { width: 32px; height: 32px; }
   .nav-actions .icon-button { min-width: 34px; min-height: 37px; }
   .home-hero { min-height: 605px; align-items: end; background-position: 69% 41%; }
-  .home-hero::before { background: linear-gradient(0deg, #0b1520 3%, #0b1520ee 27%, #0c17206b 64%, #0b142421 100%); }
+  .home-hero::before { background: linear-gradient(0deg, #0b1520 3%, #0b1520ee 35%, #0c1720d9 76%, #0c172047 89%, #0b142421 100%); }
   .hero-inner { padding: 130px 0 53px; }
   .home-hero h1 { font-size: clamp(2.75rem, 14vw, 5.2rem); }
   .hero-label { font-size: .67rem; }
@@ -449,7 +451,7 @@ th { color: var(--gold); font-size: .88rem; }
   .section-heading, .page-heading { gap: 12px; }
   .footer-inner nav { gap: 9px 16px; }
   .home-archive { padding-block: 40px; }
-  .home-pub { padding: 19px; }
+  .home-pub { padding: 19px; background-image: linear-gradient(90deg, #151219f2, #221a1bbb), url('/pub.webp'); }
   .timeline-entry { grid-template-columns: 62px minmax(0, 1fr); gap: 9px; padding-bottom: 16px; }
   .timeline-mark { padding-right: 5px; }
   .timeline-mark span { font-size: 1.6rem; }
@@ -475,6 +477,9 @@ th { color: var(--gold); font-size: .88rem; }
   .scene-spot svg { width: 15px; height: 15px; }
   .evidence-board { grid-template-columns: 1fr; }
   .evidence-board.connected::before { top: 20px; left: 9px; }
+}
+@media (max-width: 385px) {
+  .umbrella-hotspot { top: 12%; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
