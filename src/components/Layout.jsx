@@ -46,7 +46,7 @@ export default function Layout() {
       <a href="#main" className="skip-link">Skip to content</a>
       <header className="site-header">
         <div className="nav-inner">
-          <Link to="/" className="brand" aria-label="The Pineapple Files home"><img src="/umbrella.svg" alt="" width="40" height="40" /><span>The Pineapple <strong>Files</strong></span></Link>
+          <Link to="/" className="brand" aria-label="Legendiary! home"><img src="/umbrella.svg" alt="" width="40" height="40" /><span>Legen<strong>diary</strong>!</span></Link>
           <nav className={'main-nav ' + (menu ? 'is-open' : '')} aria-label="Main navigation">
             {links.map(([url, name]) => <NavLink end={url === '/'} to={url} key={url}>{name}</NavLink>)}
             <div className="nav-more" onKeyDown={(event) => { if (event.key === 'Escape') { setMorePath(''); event.currentTarget.querySelector('button').focus(); } }}>
@@ -69,7 +69,7 @@ export default function Layout() {
       <main id="main" tabIndex={-1}><Suspense fallback={<div className="wrap page" role="status">Opening file…</div>}><Outlet /></Suspense></main>
       <footer className="site-footer">
         <div className="wrap footer-inner">
-          <div><Link to="/" className="brand"><img src="/umbrella.svg" alt="" width="33" height="33" /> The Pineapple Files</Link><p>An unofficial How I Met Your Mother fan archive.</p></div>
+          <div><Link to="/" className="brand"><img src="/umbrella.svg" alt="" width="33" height="33" /><span>Legen<strong>diary</strong>!</span></Link><p>An unofficial How I Met Your Mother fan archive.</p></div>
           <nav aria-label="Footer links">
             <button onClick={() => set('spoilers', !state.spoilers)} aria-pressed={state.spoilers}>Spoilers {state.spoilers ? 'on' : 'off'}</button>
             <button onClick={() => setIntro(true)}>Replay intro</button>

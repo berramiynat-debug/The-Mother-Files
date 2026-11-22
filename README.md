@@ -1,4 +1,4 @@
-# The Pineapple Files
+# Legendiary!
 
 **SE 3355 · Web Programming**
 

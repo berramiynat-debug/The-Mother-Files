@@ -6,8 +6,9 @@ test('responsive navigation, intro dismissal, and zero horizontal overflow', asy
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page).toHaveTitle(/The Pineapple Files/);
-  await expect(page.getByRole('heading', { name: /The Pineapple\s*Files/ })).toBeVisible();
+  await expect(page).toHaveTitle(/Legendiary!/);
+  await expect(page.getByRole('heading', { name: /Legen\s*diary\s*!/ })).toBeVisible();
+  await expect(page.locator('h1 em')).toHaveText('diary');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize().width);
   const menu = page.getByRole('button', { name: 'Open menu' });
   if (await menu.isVisible()) await menu.click();
