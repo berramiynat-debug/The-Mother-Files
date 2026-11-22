@@ -12,6 +12,8 @@ test('responsive navigation, intro dismissal, and zero horizontal overflow', asy
   await expect(page.getByRole('heading', { name: 'Character dossiers.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ted Mosby' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize().width);
+  await page.goto('/story');
+  await expect(page.getByRole('button', { name: 'Open Barney’s envelope' })).toBeInViewport({ ratio: 1 });
   await page.goto('/pub');
   await expect(page.locator('.pub-scene')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize().width);

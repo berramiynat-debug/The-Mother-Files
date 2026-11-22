@@ -119,6 +119,7 @@ export default function Games() {
   return <section className="wrap page">
     {meta && <Link className="back-link" to="/games">‹ All games</Link>}
     <PageHeading eyebrow="Archive arcade" title={meta?.[2] ?? 'The game room.'} description={meta?.[3] ?? 'I tried to make a case file with no games in it. I shouldn’t have asked Barney to proofread.'} />
+    {!Screen && <p className="case-arcade-link">Looking for the umbrella? <Link className="text-link" to="/story">Play the main mystery</Link>. These are the games Barney left at the booth.</p>}
     {Screen ? <Screen key={game} /> : <div className="game-catalog grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {catalog.map(([id, Icon, title, description]) => <Link className="game-tile" key={id} to={'/games?game=' + id}><Icon size={27} /><h2>{title}</h2><p>{description}</p><span><Gamepad2 size={16} /> Play</span></Link>)}
     </div>}

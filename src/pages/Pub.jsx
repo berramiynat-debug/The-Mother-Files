@@ -89,7 +89,7 @@ export default function Pub() {
     <div className="chip-row pub-tools">{objects.map(([id, title, Icon]) => <button key={id} className="tag" aria-pressed={object === id} onClick={() => onSelect(id)}><Icon size={15} /> {title}</button>)}</div>
     <section className="panel"><p className="eyebrow">Behind the bar</p><h2>{active[1]}</h2>
       {Screen && <Screen key={object} />}
-      {object === 'envelope' && <><p className="note">The seal breaks cleanly. The note says to look under the booth for a locked drawer. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
+      {object === 'envelope' && <><p className="note">The seal breaks cleanly. Barney has marked the envelope “For the Mosby kids.” Inside is a note about the locked drawer under the booth. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
       {object === 'suitcase' && <><p>{envelope ? 'Inside, you find a notebook full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
         {envelope && <Link to="/games?game=playbook" className="button primary">Open the Playbook</Link>}</>}
     </section>

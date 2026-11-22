@@ -32,9 +32,9 @@ export default function Home() {
       <div className="wrap hero-inner">
         <p className="eyebrow hero-label"><span /> A How I Met Your Mother fan archive</p>
         <h1>The Mother<br /><em>Files.</em></h1>
-        <p className="hero-copy">Kids, somebody changed my story. A photo’s gone, the yellow umbrella is missing, and for once I’d like you two to skip ahead.</p>
+        <p className="hero-copy">Kids, the yellow umbrella and a photograph are gone. Barney says he has a lead. He’s brought an envelope, two aliases, and nobody who can vouch for either.</p>
         <div className="hero-actions flex flex-wrap gap-3">
-          <Link className="button primary" to="/story"><Fingerprint size={18} /> Start the investigation</Link>
+          <Link className="button primary" to="/story"><Fingerprint size={18} /> Play the mystery</Link>
           <Link className="button hero-outline" to="/episodes"><BookOpen size={17} /> Browse the archive</Link>
         </div>
         <button className="replay" onClick={() => setIntro(true)}><Play size={13} fill="currentColor" /> Replay opening sequence</button>

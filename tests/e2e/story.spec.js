@@ -1,46 +1,55 @@
 import { expect, test } from '@playwright/test';
 
-test('pub, pinned evidence, all investigation endings and persistence', async ({ page }) => {
+test('a first-time player can solve the main case and unlock all endings', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Enter the archive' }).click();
+  await page.getByRole('dialog').getByRole('link', { name: 'Play the mystery' }).click();
+  await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
+  await page.getByRole('button', { name: 'Robin Sparkles', exact: true }).click();
+  await expect(page.getByText(/That’s Robin’s stage name/)).toBeVisible();
+  await page.getByRole('button', { name: 'Swarley', exact: true }).click();
+  await expect(page.getByText('The cup points to Barney.')).toBeVisible();
+  await page.getByRole('button', { name: 'Go to the MacLaren’s drawer' }).click();
+  await expect(page.locator('.case-scene-anchor')).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'The MacLaren’s drawer' })).toBeVisible();
+  await page.getByRole('button', { name: 'Inspect the pineapple' }).click();
+  await expect(page.getByText(/For the lock, try the Pilot card/)).toBeVisible();
+  await page.getByRole('button', { name: 'Read the Pilot card' }).click();
+  await expect(page.getByText('September 19, 2005', { exact: true })).toBeVisible();
+  await page.getByLabel('Drawer code').fill('1919');
+  await page.getByRole('button', { name: 'Unlock drawer' }).click();
+  await expect(page.getByText(/The drawer stays shut/)).toBeVisible();
+  await page.getByLabel('Drawer code').fill('0919');
+  await page.getByRole('button', { name: 'Unlock drawer' }).click();
+  await expect(page.getByText(/You found the photograph/)).toBeVisible();
+  await page.getByRole('button', { name: 'Read the witness slip' }).click();
+  await page.getByRole('button', { name: 'Compare their aliases' }).click();
+  await expect(page.getByRole('link', { name: 'The Playbook episode' })).toBeVisible();
+  await page.getByRole('button', { name: 'Two people signed it' }).click();
+  await expect(page.getByText(/Both have a connection to Barney/)).toBeVisible();
+  await page.getByRole('button', { name: 'Both names are Barney' }).click();
+  await page.getByRole('button', { name: 'Ask Dad about the umbrella' }).click();
+
+  for (const [option, ending] of [
+    ['Restore the files to the archive', 'The archive restored'],
+    ['Publish the witnesses’ versions', 'The city reads it first'],
+    ['Leave the photograph with the booth', 'A private table'],
+  ]) {
+    await page.getByRole('button', { name: new RegExp(option) }).click();
+    await expect(page.getByRole('heading', { name: ending })).toBeVisible();
+    await page.getByRole('button', { name: 'Try another ending' }).click();
+  }
+  await page.getByText(/Secret ending · 2\/5 keepsakes/).click();
+  await expect(page.getByRole('button', { name: 'Combine evidence' })).toBeDisabled();
+  await page.getByRole('link', { name: 'Go to the rainy street' }).click();
   await page.getByRole('button', { name: 'Inspect the yellow umbrella' }).click();
   await page.getByRole('button', { name: 'Inspect the blue French horn' }).click();
-  await page.goto('/pub');
-  await page.locator('.scene-spot[aria-label="Telephone"]').click();
-  await page.getByRole('button', { name: 'Ask about the sketch' }).click();
-  await expect(page.getByText(/map of the neighborhood/)).toBeVisible();
-  await page.locator('.scene-spot[aria-label="Sealed envelope"]').click();
-  await expect(page.getByText(/seal breaks cleanly/)).toBeVisible();
-  await page.locator('.scene-spot[aria-label="Suitcase"]').click();
-  await expect(page.getByRole('link', { name: 'Open the Playbook' })).toBeVisible();
   await page.goto('/evidence');
   await page.getByRole('button', { name: 'Pull the loose thread' }).click();
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Pin to thread' }).first().click();
   await page.getByRole('button', { name: 'Connect the records' }).click();
   await expect(page.getByText(/connection is saved/)).toBeVisible();
   await page.getByRole('link', { name: 'Return to the case' }).click();
-  await page.getByRole('button', { name: /Keep the notebook/ }).click();
-  await expect(page.getByText(/answer one question at a time/)).toBeVisible();
-  await page.getByRole('button', { name: 'Ask Dad about the timestamp' }).click();
-  await page.getByRole('button', { name: 'Follow the timestamp' }).click();
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'The missing photograph' })).toBeVisible();
-  await expect(page.getByText('Your role · Keep the notebook')).toBeVisible();
-  await page.getByLabel('Drawer code').fill('0919');
-  await page.getByRole('button', { name: 'Decode' }).click();
-  await page.getByRole('button', { name: 'Investigate the signature' }).click();
-  await page.getByRole('button', { name: /^TVmaze/ }).click();
-  await page.getByRole('button', { name: 'Open the lost & found' }).click();
-  for (const [option, ending] of [
-    ['Restore the files to the archive', 'The archive restored'],
-    ['Publish the witnesses’ versions', 'The city reads it first'],
-    ['Leave the photograph with the booth', 'A private table'],
-  ]) {
-    await page.getByRole('button', { name: option }).click();
-    await expect(page.getByRole('heading', { name: ending })).toBeVisible();
-    await page.getByRole('button', { name: 'Try another ending' }).click();
-  }
   await page.getByRole('button', { name: 'Combine evidence' }).click();
   await page.getByRole('button', { name: 'Read the reverse of the photograph' }).click();
   await expect(page.getByRole('heading', { name: 'One last seat' })).toBeVisible();
@@ -53,17 +62,25 @@ test('pub, pinned evidence, all investigation endings and persistence', async ({
   await expect(page.getByText('0 / 19')).toBeVisible();
 });
 
-test('the questioning sibling hears different notes and keeps their choice after reload', async ({ page }) => {
+test('the pub activities and alternate sibling hint remain playable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/story');
+  await page.goto('/pub');
   await page.getByRole('button', { name: 'Enter the archive' }).click();
-  await page.getByRole('button', { name: /Ask the questions/ }).click();
-  await expect(page.getByText(/I’ve got 12:01 in the notebook/)).toBeVisible();
-  await page.getByRole('button', { name: 'Call Aunt Lily' }).click();
-  await expect(page.getByText(/history of calendars/)).toBeVisible();
+  await page.locator('.scene-spot[aria-label="Telephone"]').click();
+  await page.getByRole('button', { name: 'Ask about the sketch' }).click();
+  await expect(page.getByText(/map of the neighborhood/)).toBeVisible();
+  await page.locator('.scene-spot[aria-label="Sealed envelope"]').click();
+  await expect(page.getByText(/For the Mosby kids/)).toBeVisible();
+  await page.locator('.scene-spot[aria-label="Suitcase"]').click();
+  await expect(page.getByRole('link', { name: 'Open the Playbook' })).toBeVisible();
+  await page.goto('/story');
+  await page.getByText('How to play', { exact: true }).click();
+  await page.getByLabel('Your role').selectOption('notebook');
+  await page.getByText('Ask your sibling for a hint', { exact: true }).click();
+  await expect(page.getByText(/I’ll interrogate Dad/)).toBeVisible();
+  await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
   await page.reload();
-  await expect(page.getByText('Your role · Ask the questions')).toBeVisible();
-  await expect(page.getByText(/history of calendars/)).toBeVisible();
-  await page.getByRole('button', { name: 'Follow the timestamp' }).click();
-  await expect(page.getByText(/I’ll hold our place in the timeline/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Swarley', exact: true })).toBeVisible();
+  await page.getByText('How to play', { exact: true }).click();
+  await expect(page.getByLabel('Your role')).toHaveValue('notebook');
 });

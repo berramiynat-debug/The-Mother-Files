@@ -1,13 +1,13 @@
-import { chapters, roles } from '../../data/investigation.js';
+import { chapters, pilotAirDate, roles } from '../../data/investigation.js';
 
-export const firstInvestigation = { stage: 0, role: '', responses: [], combined: false, ending: '' };
+export const firstInvestigation = { stage: 0, role: '', opened: false, responses: [], combined: false, ending: '' };
 export const secretMemories = ['umbrella', 'photo', 'envelope', 'string', 'horn'];
 
 export const conclusions = {
-  restored: ['The archive restored', 'Kids, you put the photograph back with a note about who remembered what. I kept the rain and the awkward silence. Your sibling made me take my name off the fact-checking column.'],
-  published: ['The city reads it first', 'You asked Robin to put both versions out there. By breakfast, strangers were writing in with their own memories of the street. I started drafting replies. You two set me a word limit.'],
-  sealed: ['A private table', 'At your request, Lily tucked the photograph back under the booth. I told the rest of the story in our living room. Halfway through, your sibling brought out the popcorn we’d all forgotten to eat.'],
-  secret: ['One last seat', 'You turned the photograph over. The little note said, “There’s room for one more.” I asked if you wanted to hear the story behind it. You slid a chair toward me, and this time I asked you two to tell it.'],
+  restored: ['The archive restored', 'Kids, you put the photo back and credited everybody’s version. Barney asked for a footnote. You gave him one, under the name he actually uses on a tax return.'],
+  published: ['The city reads it first', 'Robin published your account with a call for other memories. By breakfast, Barney had submitted three letters to the editor. You printed one and charged him for the other two.'],
+  sealed: ['A private table', 'Lily tucked the print under the booth again. Back on the couch, you asked me to tell the story without the appendix. Barney raised his hand to object. You handed him the popcorn.'],
+  secret: ['One last seat', 'The keepsakes sent you back to the little note on the photo. “There’s room for one more.” Barney pulled up a chair without announcing it, which might be the most unbelievable thing I’ve told you all night. Then I asked you two to tell the story.'],
 };
 
 export function beginCase(value) {
@@ -16,6 +16,6 @@ export function beginCase(value) {
   return typeof value.role === 'string' && Object.hasOwn(roles, value.role) ? value : { ...value, role: '' };
 }
 
-export const decodeLabel = (value) => value.replace(/\D/g, '') === '0919';
+export const decodeLabel = (value, date = pilotAirDate) => value.replace(/\D/g, '') === date.slice(5).replace('-', '');
 export const canCombine = (unlocked) => secretMemories.every((id) => unlocked.includes(id));
 export const canClose = (stage, ending, combined) => stage === chapters.length - 1 && Object.hasOwn(conclusions, ending) && (ending !== 'secret' || combined);

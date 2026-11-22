@@ -2,7 +2,7 @@
 
 **SE 3355 · Web Programming**
 
-An unofficial *How I Met Your Mother* wiki and an original, interactive mystery. Browse the TVmaze archive or play as one of Ted’s kids in an investigation of a missing photograph and yellow umbrella. Ted narrates the case from his fictional 2030 living room. Your sibling helps you check his story against the records.
+An unofficial *How I Met Your Mother* wiki and an original, interactive mystery. Browse the TVmaze archive or play as one of Ted’s kids in an investigation of a missing photograph and yellow umbrella. Ted narrates the case from his fictional 2030 living room. Barney sends the first clue, and your sibling helps you use the evidence to check his story.
 
 - [Hosted site](https://the-mother-files-3355.berramiynat.chatgpt.site)
 - [Provider verification and attribution](docs/providers.md)
