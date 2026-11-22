@@ -6,8 +6,11 @@ test('responsive navigation, intro dismissal, and zero horizontal overflow', asy
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const mobile = (page.viewportSize()?.width ?? 1200) < 900;
-  if (mobile) await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page).toHaveTitle(/The Pineapple Files/);
+  await expect(page.getByRole('heading', { name: /The Pineapple\s*Files/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize().width);
+  const menu = page.getByRole('button', { name: 'Open menu' });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Characters' }).click();
   await expect(page.getByRole('heading', { name: 'Character dossiers.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ted Mosby' })).toBeVisible();

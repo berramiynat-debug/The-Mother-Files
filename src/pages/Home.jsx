@@ -31,7 +31,7 @@ export default function Home() {
     <section className="home-hero">
       <div className="wrap hero-inner">
         <p className="eyebrow hero-label"><span /> A How I Met Your Mother fan archive</p>
-        <h1>The Mother<br /><em>Files.</em></h1>
+        <h1>The Pineapple<br /><em>Files.</em></h1>
         <p className="hero-copy">Kids, the yellow umbrella and a photograph are gone. Barney says he has a lead. He’s brought an envelope, two aliases, and nobody who can vouch for either.</p>
         <div className="hero-actions flex flex-wrap gap-3">
           <Link className="button primary" to="/story"><Fingerprint size={18} /> Play the mystery</Link>

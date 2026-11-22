@@ -361,7 +361,7 @@ th { color: var(--gold); font-size: .88rem; }
   .main-nav { gap: 2px; }
   .main-nav > a, .nav-more > button { padding-inline: 7px; }
 }
-@media (max-width: 910px) {
+@media (max-width: 960px) {
   .hamburger { display: inline-flex; }
   .nav-inner { min-height: 64px; }
   .main-nav { display: none; position: absolute; inset: 100% 0 auto; align-items: stretch; padding: 10px 23px 18px; background: #101e29; border-bottom: 1px solid var(--line); box-shadow: 0 11px 24px #0009; }
@@ -381,7 +381,7 @@ th { color: var(--gold); font-size: .88rem; }
   .home-hero { min-height: 605px; align-items: end; background-position: 69% 41%; }
   .home-hero::before { background: linear-gradient(0deg, #0b1520 3%, #0b1520ee 27%, #0c17206b 64%, #0b142421 100%); }
   .hero-inner { padding: 130px 0 53px; }
-  .home-hero h1 { font-size: clamp(4rem, 17vw, 6.1rem); }
+  .home-hero h1 { font-size: clamp(2.75rem, 14vw, 5.2rem); }
   .hero-label { font-size: .67rem; }
   .hero-copy { max-width: 340px; }
   .hero-actions .button { padding-inline: 10px; font-size: .84rem; }
