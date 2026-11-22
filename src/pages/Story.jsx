@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Check, CircleHelp, FolderOpen, LockKeyhole, Mic, NotebookPen } from 'lucide-react';
 import { useArchive } from '../context/archiveContext.js';
 import { chapters, roles } from '../data/investigation.js';
@@ -8,6 +8,9 @@ import { CaseCompleted, CoffeeCup, Finale, MacLarensDrawer, WitnessSlip } from '
 export default function Story() {
   const { state, set, unlock, chime } = useArchive();
   const sceneHeading = useRef(null);
+  useEffect(() => {
+    if (state.story == null) set('story', (current) => current ?? firstInvestigation);
+  }, [set, state.story]);
   const progress = beginCase(state.story);
   const chapter = chapters[progress.stage];
   const role = progress.role || 'questions';

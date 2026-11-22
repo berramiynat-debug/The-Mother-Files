@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Archive, ChevronDown, Menu, Volume2, VolumeX, X } from 'lucide-react';
-import { Link, NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom';
+import { Archive, ChevronDown, FolderOpen, Menu, Volume2, VolumeX, X } from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation, useMatch, useNavigationType } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 import Intro from './Intro.jsx';
 
@@ -13,6 +13,7 @@ const extras = [['/cast', 'Cast'], ['/quotes', 'Quotes'], ['/evidence', 'Evidenc
 export default function Layout() {
   const { state, set, notice, intro, setIntro, chime } = useArchive();
   const location = useLocation();
+  const inInvestigation = useMatch('/story') !== null;
   const navigation = useNavigationType();
   const [menuPath, setMenuPath] = useState('');
   const [morePath, setMorePath] = useState('');
@@ -60,6 +61,11 @@ export default function Layout() {
           </div>
         </div>
       </header>
+      {state.story && !inInvestigation && <div className="investigation-return">
+        <div className="wrap">
+          <Link className="investigation-return-link" to="/story"><FolderOpen size={17} aria-hidden="true" /> Back to investigation</Link>
+        </div>
+      </div>}
       <main id="main" tabIndex={-1}><Suspense fallback={<div className="wrap page" role="status">Opening file…</div>}><Outlet /></Suspense></main>
       <footer className="site-footer">
         <div className="wrap footer-inner">
@@ -74,6 +80,6 @@ export default function Layout() {
       </footer>
     </div>
     {intro && <Intro />}
-    {notice && location.pathname !== '/pub' && <div className={location.pathname === '/story' ? 'sr-only' : 'toast'} role="status"><Archive size={19} /> {notice}</div>}
+    {notice && location.pathname !== '/pub' && <div className={inInvestigation ? 'sr-only' : 'toast'} role="status"><Archive size={19} /> {notice}</div>}
   </>;
 }

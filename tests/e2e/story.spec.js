@@ -93,3 +93,32 @@ test('the pub activities and alternate sibling hint remain playable', async ({ p
   await page.getByText('How to play', { exact: true }).click();
   await expect(page.getByLabel('Your role')).toHaveValue('notebook');
 });
+
+test('the return link stays usable outside the investigation and resumes the saved chapter', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Enter the archive' }).click();
+  const returnLink = page.getByRole('link', { name: 'Back to investigation' });
+  await expect(returnLink).toHaveCount(0);
+  await page.getByRole('link', { name: 'Play the mystery' }).click();
+  const envelope = page.getByRole('button', { name: 'Open Barney’s envelope' });
+  await expect(envelope).toBeVisible();
+  await expect(returnLink).toHaveCount(0);
+
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Home', exact: true }).click();
+  await expect(returnLink).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await expect.poll(() => page.locator('.investigation-return').evaluate((bar) => Math.round(bar.getBoundingClientRect().top))).toBe(0);
+  await returnLink.click();
+  await expect(envelope).toBeVisible();
+  await envelope.click();
+  await page.getByRole('button', { name: 'Swarley', exact: true }).click();
+  await page.getByRole('button', { name: 'Go to the MacLaren’s drawer' }).click();
+
+  await page.goto('/episodes');
+  await expect(returnLink).toBeVisible();
+  await page.reload();
+  await returnLink.press('Enter');
+  await expect(page.getByRole('heading', { name: 'The MacLaren’s drawer' })).toBeVisible();
+  await expect(returnLink).toHaveCount(0);
+});

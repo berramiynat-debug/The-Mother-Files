@@ -58,6 +58,11 @@ p, h1, h2, h3 { margin: 0; }
 .skip-link:focus { transform: none; }
 
 .site-header { z-index: 12; position: relative; border-bottom: 1px solid #25303a; background: #0a131c; }
+html:has(.investigation-return) { scroll-padding-top: 48px; }
+.investigation-return { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #665139; background: #17232e; }
+.investigation-return-link { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; color: #ffdc97; font-size: .9rem; font-weight: 750; }
+.investigation-return-link:hover { color: #ffedc6; text-decoration: underline; text-underline-offset: 4px; }
+.investigation-return-link:focus-visible { outline-offset: -2px; }
 .nav-inner { width: min(1360px, calc(100% - 72px)); min-height: 72px; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
 .brand { display: inline-flex; gap: 10px; align-items: center; white-space: nowrap; font-family: var(--serif); font-weight: 800; font-size: 1.17rem; color: #fbedd7; }
 .brand strong { color: var(--gold); }
