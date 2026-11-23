@@ -3,8 +3,6 @@ dist/
 .env*
 !.env.example
 .vercel/
-.openai/*
-!.openai/hosting.json
 playwright-report/
 test-results/
 coverage/

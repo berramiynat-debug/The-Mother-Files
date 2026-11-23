@@ -48,7 +48,7 @@ export async function tmdbResponse(method, requestUrl, env, fetcher = (url, opti
     const deadline = setTimeout(() => controller.abort(), 5500);
     try {
       const response = await fetcher(url.href, {
-        // Workers support manual redirects. The status check rejects every redirect.
+        // Handle redirects manually so the status check can reject them.
         signal: controller.signal, redirect: 'manual',
         headers: bearer ? { Authorization: 'Bearer ' + bearer, Accept: 'application/json' } : { Accept: 'application/json' },
       });

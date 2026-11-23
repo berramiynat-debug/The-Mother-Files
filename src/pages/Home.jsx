@@ -28,9 +28,9 @@ export default function Home() {
     [show.data?.date?.slice(0, 4), 'Series premiere'],
   ];
   return <>
-    <section className="home-hero">
+    <section className="home-hero relative isolate grid">
       <div className="wrap hero-inner">
-        <p className="eyebrow hero-label"><span /> A How I Met Your Mother fan archive</p>
+        <p className="eyebrow hero-label flex items-center gap-2.5"><span /> A How I Met Your Mother fan archive</p>
         <h1>Legen<em>diary</em>!</h1>
         <p className="hero-copy">Kids, the yellow umbrella and a photograph are gone. Barney says he has a lead. He’s brought an envelope, two aliases, and nobody who can vouch for either.</p>
         <div className="hero-actions flex flex-wrap gap-3">
@@ -43,16 +43,16 @@ export default function Home() {
       <span className="hero-location">MANHATTAN, NY <span /> AFTER MIDNIGHT</span>
     </section>
     <section className="stat-strip" aria-label="Series at a glance">
-      <div className="wrap stat-grid">{stats.map(([value, label]) => <div key={label}><strong>{value ?? '—'}</strong><span>{label}</span></div>)}</div>
+      <div className="wrap stat-grid grid">{stats.map(([value, label]) => <div key={label}><strong>{value ?? '—'}</strong><span>{label}</span></div>)}</div>
     </section>
     <section className="wrap home-archive">
       <div className="section-heading"><div><p className="eyebrow">The archive</p><h2>Explore the files.</h2></div>
         <button className="button secondary" disabled={!safeEpisodes.length} onClick={() => navigate('/episodes/' + safeEpisodes[Math.floor(Math.random() * safeEpisodes.length)].id)}><Dice5 size={17} /> Random episode</button>
       </div>
       <div className="home-index grid sm:grid-cols-2 lg:grid-cols-3">
-        {entries.map(([url, Icon, title, copy]) => <Link to={url} key={url}><span className="index-icon"><Icon size={21} /></span><div><h3>{title}</h3><p>{copy}</p></div></Link>)}
+        {entries.map(([url, Icon, title, copy]) => <Link className="flex items-center gap-3.5 p-4" to={url} key={url}><span className="index-icon"><Icon size={21} /></span><div><h3>{title}</h3><p>{copy}</p></div></Link>)}
       </div>
-      <div className="home-pub"><div><p className="eyebrow">Open late</p><h2>Your booth is waiting.</h2><p>I used to leave notes in that booth. An envelope was a little formal, even for me.</p><Link to="/pub" className="button primary">Go to the pub</Link></div></div>
+      <div className="home-pub isolate mt-7 grid items-center"><div><p className="eyebrow">Open late</p><h2>Your booth is waiting.</h2><p>I used to leave notes in that booth. An envelope was a little formal, even for me.</p><Link to="/pub" className="button primary">Go to the pub</Link></div></div>
       <button className="quiet-secret" title="Inspect the blue French horn" aria-label="Inspect the blue French horn" onClick={() => unlock('horn')}><Music size={18} aria-hidden="true" /></button>
     </section>
   </>;

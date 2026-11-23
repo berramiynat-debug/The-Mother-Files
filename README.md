@@ -4,7 +4,7 @@
 
 An unofficial *How I Met Your Mother* wiki and an original, interactive mystery. Browse the TVmaze archive or play as one of Ted’s kids in an investigation of a missing photograph and yellow umbrella. Ted narrates the case from his fictional 2030 living room. Barney sends the first clue, and your sibling helps you use the evidence to check his story.
 
-- [Hosted site](https://the-mother-files-3355.berramiynat.chatgpt.site)
+- [Hosted site](https://legendiary.vercel.app)
 - [Provider verification and attribution](docs/providers.md)
 - [Rubric and instructor walkthrough](docs/demo.md)
 
@@ -33,9 +33,7 @@ The end-to-end suite starts a production preview on port 4185. On Windows, set `
 
 ## Deploy
 
-**Vercel** can import this repository as a Vite project. Use `npm run build` and output directory `dist`. Add the server-side TMDB setting in the environment for Production and, if desired, Preview. The function is `api/tmdb.js`. `vercel.json` routes direct browser refreshes to the React app while preserving `/api/tmdb` and assets.
-
-**ChatGPT Sites** uses `npm run build:sites` and the manifest in `.openai/hosting.json`. The Worker serves the same compiled React app and runs the shared TMDB proxy with the encrypted runtime variable. The hosted site’s sharing policy controls who can open the URL.
+Import this repository into **Vercel** as a Vite project. The build command is `npm run build` and the output directory is `dist`. Add `TMDB_API_KEY` or `TMDB_READ_ACCESS_TOKEN` as a server-side environment variable for Production. If TMDB credentials are absent, the wiki still uses TVmaze records and the image component provides a placeholder when artwork is unavailable. `vercel.json` routes direct browser refreshes to the React app while preserving `/api/tmdb` and assets.
 
 ## Source map
 
@@ -47,11 +45,12 @@ The end-to-end suite starts a production preview on port 4185. On Windows, set `
 | `src/hooks/useResource.js` | Reusable loading, retry, and stale-response protection |
 | `src/features` and `src/data` | Wiki cards, games, case rules, and original narrative |
 | `src/context` | Favorites, clues, story progress, and preferences in localStorage |
-| `server` and `api` | Shared TMDB server logic and hosting entry points |
+| `src/styles/main.css` | Tailwind theme, shared component styles, and scene effects |
+| `server/tmdb.js` and `api/tmdb.js` | TMDB proxy logic and Vercel function entry point |
 | `tests` | Unit and browser checks |
 
 ## Credits
 
 TVmaze supplies canonical listing/detail records under its API attribution and ShareAlike terms. TMDB supplies supplementary media. Community aliases and quotes are retrieved at runtime and credited in the app. The name of the series, its characters, and associated images belong to their respective rights holders.
 
-This educational project was implemented with assistance from OpenAI Codex. The city and pub illustrations were generated using OpenAI ImageGen for this project. The narrative, artwork composition, and synthesized chimes are original to the project. For source-level credits and known provider limits, see the [verification report](docs/providers.md).
+For source-level credits and known provider limits, see the [verification report](docs/providers.md).

@@ -54,7 +54,7 @@ export default function Layout() {
               {more && <div className="nav-dropdown">{extras.map(([url, name]) => <NavLink key={url} to={url}>{name}</NavLink>)}</div>}
             </div>
           </nav>
-          <div className="nav-actions">
+          <div className="nav-actions flex items-center">
             <NavLink to="/collection" className="icon-button" aria-label="Memory collection" title="Memory collection"><Archive size={18} /></NavLink>
             <button className="icon-button sound-toggle" aria-label={state.sound ? 'Mute sound' : 'Enable sound'} title="Sound preference" onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? <Volume2 size={18} /> : <VolumeX size={18} />}</button>
             <button className="icon-button hamburger" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} onClick={() => { setMenuPath(menu ? '' : key); setMorePath(''); }}>{menu ? <X size={22} /> : <Menu size={22} />}</button>
