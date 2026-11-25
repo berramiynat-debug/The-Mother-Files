@@ -44,6 +44,96 @@ test('TVmaze network failure, retry, loading, and empty states', async ({ page }
   await expect(page.getByRole('heading', { name: 'No matching records' })).toBeVisible();
 });
 
+test('an episode detail survives a list outage and accepts only episodes from this show', async ({ page }) => {
+  const endpoint = 'https://api.tvmaze.com/episodes/';
+  await page.route('https://api.tvmaze.com/shows/171/episodes', (route) => route.fulfill({ status: 503, json: {} }));
+  await page.route(endpoint + '12285?embed=show', (route) => route.fulfill({
+    json: { id: 12285, name: 'Pilot', season: 1, number: 1, _embedded: { show: { id: 171 } } },
+  }));
+  await page.route(endpoint + '1?embed=show', (route) => route.fulfill({
+    json: { id: 1, name: 'An unrelated episode', season: 1, number: 1, _embedded: { show: { id: 1 } } },
+  }));
+  await page.route(endpoint + '999999999?embed=show', (route) => route.fulfill({ status: 404, json: {} }));
+
+  await page.goto('/episodes/12285');
+  await expect(page.getByRole('heading', { name: 'Pilot' })).toBeVisible();
+  await expect(page).toHaveTitle('Pilot | Legendiary!');
+  await page.goto('/episodes/1');
+  await expect(page.getByRole('heading', { name: 'Episode not found' })).toBeVisible();
+  await expect(page.getByText('An unrelated episode')).toHaveCount(0);
+  await page.goto('/episodes/999999999');
+  await expect(page.getByRole('heading', { name: 'Episode not found' })).toBeVisible();
+});
+
+test('keyboard navigation focuses the new page and updates the browser title', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Episodes' }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Episode archive.' })).toBeVisible();
+  await expect(page.getByRole('main')).toBeFocused();
+  await expect(page).toHaveTitle('Episode archive | Legendiary!');
+  await page.goBack();
+  await expect(page).toHaveTitle('Legendiary! | A HIMYM Fan Archive');
+  await expect(page.getByRole('main')).toBeFocused();
+});
+
+test('independent tabs preserve concurrent archive updates and reflect a deliberate reset', async ({ page, context }) => {
+  await page.goto('/');
+  const other = await context.newPage();
+  await other.goto('/');
+  await Promise.all([
+    page.getByRole('button', { name: 'Inspect the yellow umbrella' }).click(),
+    other.getByRole('button', { name: 'Inspect the blue French horn' }).click(),
+  ]);
+  await page.goto('/collection');
+  await other.goto('/collection');
+  for (const tab of [page, other]) {
+    await expect(tab.getByRole('heading', { name: 'Yellow umbrella' })).toBeVisible();
+    await expect(tab.getByRole('heading', { name: 'The blue French horn' })).toBeVisible();
+  }
+  await other.getByRole('button', { name: 'Reset local progress' }).click();
+  await other.getByRole('button', { name: 'Clear archive data' }).click();
+  await expect(page.getByText('0 / 19')).toBeVisible();
+});
+
+test('homepage statistics distinguish loading, unavailable, returned zero and resolved data', async ({ page }) => {
+  const base = 'https://api.tvmaze.com/shows/171';
+  let release;
+  const waiting = new Promise((resolve) => { release = resolve; });
+  let shows = 0;
+  await page.route(base, (route) => {
+    shows++;
+    return route.fulfill({ json: { id: 171, name: 'How I Met Your Mother', premiered: '2005-09-19', url: 'https://www.tvmaze.com/shows/171/how-i-met-your-mother' } });
+  });
+  await page.route(base + '/seasons', async (route) => {
+    await waiting;
+    await route.fulfill({ json: [{ id: 1, number: 1 }] });
+  });
+  await page.route(base + '/cast', (route) => route.fulfill({ json: [] }));
+  await page.route(base + '/episodes', (route) => route.fulfill({ status: 503, json: {} }));
+  await page.goto('/');
+  const stat = (label) => page.locator('.stat-grid > div').filter({ hasText: label }).locator('strong');
+  await expect(stat('Seasons')).toHaveText('Loading…');
+  release();
+  await expect(stat('Seasons')).toHaveText('1');
+  await expect(stat('Episodes')).toHaveText('Unavailable');
+  await expect(stat('Listed characters')).toHaveText('0');
+  await expect(stat('Series premiere')).toHaveText('2005');
+  await expect(page.getByRole('link', { name: 'Series record on TVmaze' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Random episode' })).toBeDisabled();
+  await expect(page.getByRole('link', { name: 'Play the mystery' })).toBeEnabled();
+  expect(shows).toBe(1);
+
+  await page.unroute(base + '/episodes');
+  const pilot = { id: 12285, name: 'Pilot', season: 1, number: 1, airdate: '2005-09-19' };
+  await page.route(base + '/episodes', (route) => route.fulfill({ json: [pilot] }));
+  await page.route('https://api.tvmaze.com/episodes/12285?embed=show', (route) =>
+    route.fulfill({ json: { ...pilot, _embedded: { show: { id: 171 } } } }));
+  await page.reload();
+  await page.getByRole('button', { name: 'Random episode' }).click();
+  await expect(page).toHaveURL(/\/episodes\/12285$/);
+  await expect(page.getByRole('heading', { name: 'Pilot' })).toBeVisible();
+});
+
 test('spoiler safe default, direct URL lock, and opt-in', async ({ page }) => {
   await page.goto('/episodes/12492');
   await expect(page.getByRole('heading', { name: 'Under seal' })).toBeVisible();
@@ -60,6 +150,8 @@ test('live character aliases, canon conflict, and Case File 3355', async ({ page
   await expect(page.getByText('Swarley protocol unlocked.')).toBeVisible();
   await page.getByRole('button', { name: 'Suit up' }).click();
   await page.goto('/sources');
+  await expect(page.locator('.source').filter({ has: page.getByRole('heading', { name: 'GroqCloud' }) }))
+    .toContainText('Optional · on demand');
   await expect(page.getByRole('row', { name: /Marshall Eriksen Jason Segel Conflict/ })).toBeVisible();
   await page.getByPlaceholder('File number').fill('3355');
   await page.getByRole('button', { name: 'Open file' }).click();

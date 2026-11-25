@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pause, Play, Umbrella, Volume2, VolumeX } from 'lucide-react';
+import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 import { Modal } from './UI.jsx';
@@ -9,11 +9,11 @@ const frames = [
   ['Nine seasons indexed.', 'I said I’d keep it short. I didn’t say compared to what.', 2400],
   ['Legen—', 'Wait for it…', 1700],
   [<>Legen<em>dary!</em></>, '', 1200],
-  ['Two things are missing.', 'The booth photo and my yellow umbrella. Barney’s brought an envelope.', 2700],
-  ['Your turn, kids.', 'Open Barney’s envelope, solve four chapters, and decide who gets to hear the story.'],
+  ['A page has gone missing.', 'Barney says The Fifth Alibi never happened. Marshall has a signed record of the page.', 2700],
+  ['Your turn, kids.', 'Open Barney’s envelope and use the records to check my story, one detail at a time.'],
 ];
 
-const sceneNames = ['Living room', 'Archive scan', 'The pause', 'Legendary', 'The missing files', 'Your turn'];
+const sceneNames = ['Living room', 'Archive scan', 'The pause', 'Legendary', 'The missing page', 'Your turn'];
 const lastStep = frames.length - 1;
 
 export default function Intro() {
@@ -39,7 +39,7 @@ export default function Intro() {
   }
   return <Modal title="The Memory Glitch" className="intro" onClose={finishIntro}>
     <div className="intro-inner">
-      <Umbrella className="intro-umbrella" size={70} strokeWidth={1.1} />
+      <img className="intro-playbook" src="/playbook.svg" alt="" width="70" height="70" />
       <p className="eyebrow">Dad’s archive · Living room, 2030</p>
       <div aria-live="polite" aria-atomic="true">
         <div key={step} className="intro-frame"><h2>{title}</h2>{description && <p>{description}</p>}</div>

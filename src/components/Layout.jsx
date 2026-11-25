@@ -9,6 +9,7 @@ const links = [
   ['/pub', 'The Pub'], ['/games', 'Games'], ['/story', 'The Mystery'],
 ];
 const extras = [['/cast', 'Cast'], ['/quotes', 'Quotes'], ['/evidence', 'Evidence board'], ['/sources', 'Sources'], ['/about', 'About']];
+const archiveTitle = 'Legendiary! | A HIMYM Fan Archive';
 
 export default function Layout() {
   const { state, set, notice, intro, setIntro, chime } = useArchive();
@@ -18,6 +19,9 @@ export default function Layout() {
   const [menuPath, setMenuPath] = useState('');
   const [morePath, setMorePath] = useState('');
   const positions = useRef(new Map());
+  const main = useRef(null);
+  const route = location.pathname + location.search;
+  const focusedRoute = useRef(route);
   const key = location.key;
   const menu = menuPath === key;
   const more = morePath === key;
@@ -40,13 +44,31 @@ export default function Layout() {
       else document.getElementById('main')?.focus({ preventScroll: true });
     };
   }, [intro]);
+  useEffect(() => {
+    if (intro || focusedRoute.current === route) return;
+    focusedRoute.current = route;
+    main.current?.focus({ preventScroll: true });
+  }, [intro, route]);
+  useEffect(() => {
+    const content = main.current;
+    if (!content) return;
+    function updateTitle() {
+      const heading = content.querySelector('h1')?.textContent.trim().replace(/\.$/, '');
+      const title = location.pathname !== '/' && heading ? heading + ' | Legendiary!' : archiveTitle;
+      if (document.title !== title) document.title = title;
+    }
+    updateTitle();
+    const observer = new MutationObserver(updateTitle);
+    observer.observe(content, { subtree: true, childList: true, characterData: true });
+    return () => observer.disconnect();
+  }, [location.pathname, route]);
 
   return <>
     <div inert={intro ? true : undefined}>
       <a href="#main" className="skip-link">Skip to content</a>
       <header className="site-header">
         <div className="nav-inner">
-          <Link to="/" className="brand" aria-label="Legendiary! home"><img src="/umbrella.svg" alt="" width="40" height="40" /><span>Legen<strong>diary</strong>!</span></Link>
+          <Link to="/" className="brand" aria-label="Legendiary! home"><img src="/playbook.svg" alt="" width="40" height="40" /><span>Legen<strong>diary</strong>!</span></Link>
           <nav className={'main-nav ' + (menu ? 'is-open' : '')} aria-label="Main navigation">
             {links.map(([url, name]) => <NavLink end={url === '/'} to={url} key={url}>{name}</NavLink>)}
             <div className="nav-more" onKeyDown={(event) => { if (event.key === 'Escape') { setMorePath(''); event.currentTarget.querySelector('button').focus(); } }}>
@@ -66,10 +88,10 @@ export default function Layout() {
           <Link className="investigation-return-link" to="/story"><FolderOpen size={17} aria-hidden="true" /> Back to investigation</Link>
         </div>
       </div>}
-      <main id="main" tabIndex={-1}><Suspense fallback={<div className="wrap page" role="status">Opening file…</div>}><Outlet /></Suspense></main>
+      <main id="main" tabIndex={-1} ref={main}><Suspense fallback={<div className="wrap page" role="status">Opening file…</div>}><Outlet /></Suspense></main>
       <footer className="site-footer">
         <div className="wrap footer-inner">
-          <div><Link to="/" className="brand"><img src="/umbrella.svg" alt="" width="33" height="33" /><span>Legen<strong>diary</strong>!</span></Link><p>An unofficial How I Met Your Mother fan archive.</p></div>
+          <div><Link to="/" className="brand"><img src="/playbook.svg" alt="" width="33" height="33" /><span>Legen<strong>diary</strong>!</span></Link><p>An unofficial How I Met Your Mother fan archive.</p></div>
           <nav aria-label="Footer links">
             <button onClick={() => set('spoilers', !state.spoilers)} aria-pressed={state.spoilers}>Spoilers {state.spoilers ? 'on' : 'off'}</button>
             <button onClick={() => setIntro(true)}>Replay intro</button>

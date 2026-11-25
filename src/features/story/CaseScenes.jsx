@@ -1,187 +1,127 @@
 import { useState } from 'react';
-import { Check, Coffee, FileText, LockKeyhole, Mail, NotebookPen, ShieldCheck } from 'lucide-react';
+import { Check, FileText, Mic } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useArchive } from '../../context/archiveContext.js';
-import { caseExhibits, pilotAirDate } from '../../data/investigation.js';
+import { caseExhibits, claims, endings, exhibits, witnesses } from '../../data/investigation.js';
 import { memories } from '../../data/memories.js';
-import { useResource } from '../../hooks/useResource.js';
-import { tvmazeService } from '../../services/providers/tvmazeService.js';
-import { canClose, canCombine, decodeLabel, secretMemories } from './logic.js';
+import { assessDeduction, hasKeepsakes, secretMemories } from './logic.js';
 
-const fetchPilot = () => tvmazeService.episode(12285);
-const formatDate = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-const coffeeNames = [
-  ['Robin Sparkles', 'That’s Robin’s stage name. The cup is addressed to someone else.'],
-  ['Swarley', ''],
-  ['The Blitz', 'The cup starts with SWAR. The other nickname won’t fit.'],
-];
+const timelinePositions = ['First', 'Second', 'Third'];
 
-export function BarneyNote({ label = 'Barney’s note', children }) {
-  return <figure className="barney-note">
-    <figcaption><Mail size={16} aria-hidden="true" /> {label}</figcaption>
-    <blockquote>{children}</blockquote>
+function WitnessRecording({ chapter }) {
+  return <figure className="case-dialogue case-recording">
+    <figcaption><Mic size={15} aria-hidden="true" /> Dad’s recording</figcaption>
+    <blockquote>{chapter.recording}</blockquote>
+    <p><strong>Claim to check</strong><br />{claims[chapter.claim]}</p>
   </figure>;
 }
 
-function Found({ children }) {
-  return <p className="case-found"><Check size={19} aria-hidden="true" /> {children}</p>;
-}
-
-export function CoffeeCup({ progress, openLetter, answer, advance }) {
-  const [feedback, setFeedback] = useState('');
-  if (progress.responses[0]) return <>
-    <Found>The cup points to Barney.</Found>
-    <BarneyNote label="Barney’s recorded message">Fine. That name is mine. I was at our booth when the umbrella went missing. Check the drawer. I left the code with Lily because she’s the only one who reads footnotes.</BarneyNote>
-    <div className="button-row"><button className="button primary" onClick={advance}>Go to the MacLaren’s drawer</button><Link className="text-link" to="/episodes/12313">The Swarley episode</Link></div>
-  </>;
-
-  if (!progress.opened) return <div className="case-envelope paper">
-    <div><p className="eyebrow"><Mail size={17} aria-hidden="true" /> From Barney Stinson</p>
-      <p className="envelope-message">For the Mosby kids.<br />Open before your father starts the flashback.</p></div>
-    <button className="button primary" onClick={openLetter}>Open Barney’s envelope</button>
-  </div>;
-
-  return <>
-    <div className="case-unseal">
-      <div className="case-ticket paper case-unsealed-ticket">
-        <Coffee size={22} aria-hidden="true" />
-        <div><p className="eyebrow">Coffee order · Smudged label</p><p className="coffee-mark">SWARL_Y</p></div>
-      </div>
+function EvidenceRecords({ chapter, progress, citations, setCitations, inspect }) {
+  const available = [...new Set([...chapter.discover, ...chapter.deduction.sources,
+    ...(chapter.compare ?? []).filter((id) => progress.discovered.includes(id))])];
+  return <fieldset className="case-choices">
+    <legend>Evidence to examine and cite</legend>
+    <div className="case-records">
+      {available.map((id) => {
+        const exhibit = exhibits[id];
+        const read = progress.discovered.includes(id);
+        return <article key={id} className={'case-record' + (read ? ' case-record-read' : '')}>
+          <h3 tabIndex={-1} id={'case-record-' + id}><FileText size={17} aria-hidden="true" /> {exhibit.title}</h3>
+          {read ? <>
+            {chapter.discover.includes(id) ? <p>{exhibit.text}</p> :
+              <details><summary>Review record</summary><p>{exhibit.text}</p></details>}
+            <label className="case-citation"><input type="checkbox" checked={citations.includes(id)}
+              onChange={(event) => setCitations(event.target.checked ? [...citations, id] : citations.filter((value) => value !== id))} />
+              Cite {exhibit.title}</label>
+          </> : <button className={'button ' + (exhibit.action ? 'primary' : 'secondary')}
+            aria-label={exhibit.action ?? 'Inspect ' + exhibit.title} onClick={() => inspect(id)}>
+            {exhibit.action ?? 'Inspect record'}
+          </button>}
+          {read && <p className="credit">Case record · {witnesses[exhibit.witness]}</p>}
+        </article>;
+      })}
     </div>
-    <BarneyNote>That cup is also a legal document. I checked with Marshall. He said to stop calling him.</BarneyNote>
-    <fieldset className="case-choices">
-      <legend>Which name belongs on the cup?</legend>
-      <div className="choice-grid">
-        {coffeeNames.map(([name, message]) => <button key={name} className="choice" onClick={() => message ? setFeedback(message) : answer('swarley')}>{name}</button>)}
-      </div>
-    </fieldset>
-    {feedback && <p className="case-feedback" role="status">{feedback}</p>}
-  </>;
+  </fieldset>;
 }
 
-export function MacLarensDrawer({ progress, solved, advance }) {
-  const { state, unlock } = useArchive();
-  const [evidence, setEvidence] = useState('');
-  const [value, setValue] = useState('');
-  const [rejected, setRejected] = useState(0);
-  const code = value.replace(/\D/g, '').slice(0, 4);
-  const pilot = useResource(evidence === 'pilot' ? 'case-pilot' : null, fetchPilot);
-  const apiDate = pilot.data?.date ?? '';
-  const liveDate = /^\d{4}-\d{2}-\d{2}$/.test(apiDate) && Number.isFinite(Date.parse(apiDate));
-  const airDate = liveDate ? apiDate : pilotAirDate;
-  const photo = progress.responses[1] === 'photo' || (progress.opened === undefined && state.unlocked.includes('photo'));
+export function CaseScene({ chapter, progress, inspect, dispatch, onIncorrect }) {
+  const [citations, setCitations] = useState([]);
+  const [choice, setChoice] = useState('');
+  const [order, setOrder] = useState([]);
+  const [feedback, setFeedback] = useState('');
+  const { deduction } = chapter;
+  const solved = progress.completed.includes(deduction.id);
 
-  if (photo) return <div className="case-drawer-open">
-    <figure className="case-recovered-photo" aria-hidden="true"><img src="/pub.webp" alt="" /><figcaption>Corner booth</figcaption></figure>
-    <div><Found>Drawer opened. You found the photograph.</Found>
-      <p>The photo has a fresh sign-out slip clipped to it. Two witnesses signed it. Their handwriting looks suspiciously similar.</p>
-      <button className="button primary" onClick={advance}>Read the witness slip</button></div>
-  </div>;
-
-  function decode(event) {
+  function check(event) {
     event.preventDefault();
-    if (decodeLabel(value, airDate)) { unlock('photo'); solved(); }
-    else setRejected((previous) => previous + 1);
+    const answer = { type: 'deduce', choice, citations, order };
+    const message = assessDeduction(progress, answer);
+    setFeedback(message);
+    onIncorrect(Boolean(message));
+    if (!message) dispatch(answer, true);
   }
 
+  if (solved) return <p className="case-found" role="status"><Check size={19} aria-hidden="true" /> {deduction.confirmed}</p>;
   return <>
-    <div className="case-evidence-actions">
-      <button className="button secondary" aria-pressed={evidence === 'pilot'} onClick={() => setEvidence('pilot')}><FileText size={17} aria-hidden="true" /> Read the Pilot card</button>
-      <button className="button secondary" aria-pressed={evidence === 'pineapple'} onClick={() => { setEvidence('pineapple'); unlock('pineapple'); }}>Inspect the pineapple</button>
-    </div>
-    {evidence === 'pilot' && <div className="case-ticket paper" aria-live="polite">
-      <FileText size={22} aria-hidden="true" />
-      <div><p className="eyebrow">Pilot · Season 1, Episode 1</p>
-        <strong>{formatDate.format(new Date(airDate + 'T00:00:00Z'))}</strong>
-        <p>{liveDate ? 'Original air date · TVmaze' : 'Date from Lily’s case copy'} · <Link to="/episodes/12285">Open the episode record</Link></p></div>
-    </div>}
-    {evidence === 'pineapple' && <p className="case-feedback" role="status">A note from Lily: “I have no idea how this got back in here. For the lock, try the Pilot card.”</p>}
-    <form className="decode-form case-lock" onSubmit={decode}>
-      <div key={rejected} className={'case-dials' + (rejected ? ' is-jammed' : '')} aria-hidden="true">
-        <LockKeyhole size={18} />
-        {[0, 1, 2, 3].map((slot) => <span key={slot} className="case-dial"><span key={code[slot] ?? 'empty'}>{code[slot] ?? '–'}</span></span>)}
-      </div>
-      <label className="field-label">Drawer code <input type="text" value={value} onChange={(event) => { setValue(event.target.value); setRejected(0); }}
-        aria-invalid={rejected ? true : undefined} aria-describedby={rejected ? 'drawer-help drawer-error' : 'drawer-help'} placeholder="MMDD" maxLength={5} inputMode="numeric" autoComplete="off" required /></label>
-      <button className="button primary" type="submit">Unlock drawer</button>
-      <p id="drawer-help">Enter the month and day as four digits. March 7 would be 0307.</p>
+    <EvidenceRecords chapter={chapter} progress={progress} citations={citations} setCitations={setCitations} inspect={inspect} />
+    <WitnessRecording chapter={chapter} />
+    <form onSubmit={check}>
+      {chapter.timeline && <fieldset className="case-choices">
+        <legend>Put the events in order</legend>
+        <div className="case-timeline">
+          {timelinePositions.map((position, index) => <div key={position} className="field-label">
+            <label htmlFor={'timeline-position-' + index}>{position}</label>
+            <select required id={'timeline-position-' + index} value={order[index] ?? ''} onChange={(event) => {
+              const value = event.target.value;
+              setOrder((previous) => timelinePositions.map((_, slot) => slot === index ? value : previous[slot] ?? ''));
+            }}>
+              <option value="">Choose an event</option>
+              {Object.entries(chapter.timeline).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+            </select>
+          </div>)}
+        </div>
+      </fieldset>}
+      <fieldset className="case-choices">
+        <legend>{deduction.prompt}</legend>
+        <div className="case-answers">
+          {Object.entries(deduction.choices).map(([id, label]) => <label key={id} className="choice">
+            <input type="radio" required name="case-answer" value={id} checked={choice === id} onChange={() => setChoice(id)} /> {label}
+          </label>)}
+        </div>
+      </fieldset>
+      <button className="button primary" type="submit">Check deduction</button>
+      <div role="status">{feedback && <p className="case-feedback">{feedback}</p>}</div>
     </form>
-    {rejected > 0 && <p className="case-feedback" id="drawer-error" role="status">The drawer stays shut. Use the Pilot’s month and day, in that order.</p>}
-    <BarneyNote label="Barney’s note under the booth">For the record, I object to the pineapple being called as a witness. It was present at a completely different incident.</BarneyNote>
   </>;
 }
 
-export function WitnessSlip({ progress, answer, advance }) {
-  const [inspected, setInspected] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  if (progress.responses[2]) return <>
-    <Found>Both signatures belong to Barney.</Found>
-    <BarneyNote label="Barney, after being shown the evidence">I offered to produce an independent witness. I did not specify independent from whom. Fine, the slip was my doing. The umbrella? Ask your dad.</BarneyNote>
-    <button className="button primary" onClick={advance}>Ask Dad about the umbrella</button>
-  </>;
-
+export function CaseFinale({ unlocked, close }) {
+  const eligible = hasKeepsakes(unlocked);
+  const count = secretMemories.filter((id) => unlocked.includes(id)).length;
   return <>
-    <div className="case-ticket paper">
-      <FileText size={22} aria-hidden="true" />
-      <div><p className="eyebrow">Umbrella sign-out slip · Witnesses</p><p className="case-signatures"><span>Swarley</span><span>Lorenzo von Matterhorn</span></p></div>
-    </div>
-    <button className="button secondary" aria-expanded={inspected} onClick={() => setInspected(!inspected)}><NotebookPen size={17} aria-hidden="true" /> {inspected ? 'Hide the alias notes' : 'Compare their aliases'}</button>
-    {inspected && <p className="case-feedback">Swarley is the name from Barney’s cup. Lorenzo von Matterhorn is a character Barney invented for the Playbook. <Link className="text-link" to="/characters/46417">Barney’s dossier</Link> · <Link className="text-link" to="/episodes/12380">The Playbook episode</Link></p>}
-    <fieldset className="case-choices">
-      <legend>Who actually signed the slip?</legend>
-      <div className="choice-grid">
-        <button className="choice" onClick={() => setFeedback('Read the names again. Both have a connection to Barney.')}>Two people signed it</button>
-        <button className="choice" onClick={() => answer('barney')}>Both names are Barney</button>
-      </div>
-    </fieldset>
-    {feedback && <p className="case-feedback" role="status">{feedback}</p>}
-  </>;
-}
-
-const decisions = [
-  ['restored', 'Restore the files to the archive', 'Keep the photo with a note about who remembered what.'],
-  ['published', 'Publish the witnesses’ versions', 'Ask Robin to invite New York to add its memories.'],
-  ['sealed', 'Leave the photograph with the booth', 'Keep this version for the people who were there.'],
-];
-
-export function Finale({ progress, update }) {
-  const { state, unlock, chime } = useArchive();
-  const found = canCombine(state.unlocked);
-  const count = secretMemories.filter((id) => state.unlocked.includes(id)).length;
-  function close(ending) {
-    if (!canClose(progress.stage, ending, progress.combined)) return;
-    update({ ending });
-    if (ending === 'secret') unlock('secret');
-    chime();
-  }
-
-  return <>
-    <BarneyNote label="Barney’s closing argument">As the only witness who appeared twice, I believe I should get two votes. Your aunt Lily has submitted a counterargument consisting entirely of a look.</BarneyNote>
+    <h3>Where does the page belong?</h3>
     <div className="case-decisions">
-      {decisions.map(([id, label, consequence]) => <button className="choice role-choice" key={id} onClick={() => close(id)}><strong>{label}</strong><span>{consequence}</span></button>)}
+      {Object.entries(endings).filter(([id]) => id !== 'secret').map(([id, ending]) =>
+        <button key={id} className="choice" onClick={() => close(id)}>{ending.choice}</button>)}
     </div>
-    <details className="case-help case-inventory" open={found || undefined}>
-      <summary>Secret ending · {count}/{secretMemories.length} keepsakes</summary>
-      <ul>{secretMemories.map((id) => {
-        const owned = state.unlocked.includes(id);
-        const exhibit = caseExhibits[id];
-        return <li key={id}><strong>{memories.find((row) => row.id === id)?.title}</strong>
-          {owned ? <span>Found</span> : <span>{exhibit.clue} {exhibit.route && <Link className="text-link" to={exhibit.route}>{exhibit.link}</Link>}</span>}</li>;
-      })}</ul>
-      {progress.combined ? <button className="button primary" onClick={() => close('secret')}>Read the reverse of the photograph</button>
-        : <button className="button secondary" disabled={!found} onClick={() => update({ combined: true })}>Combine evidence</button>}
+    <details className="case-help case-inventory">
+      <summary>Extra ending · {count}/{secretMemories.length} keepsakes</summary>
+      <ul>{secretMemories.map((id) => <li key={id}>
+        <strong>{memories.find((memory) => memory.id === id).title}</strong>
+        {unlocked.includes(id) ? <span>Recovered</span> : <span>{caseExhibits[id].clue} <Link className="text-link" to={caseExhibits[id].route}>{caseExhibits[id].link}</Link></span>}
+      </li>)}</ul>
+      <button className="button primary" disabled={!eligible} onClick={() => close('secret')}>{endings.secret.choice}</button>
     </details>
   </>;
 }
 
 export function CaseCompleted({ ending, onChooseAgain, onRestart }) {
-  return <div className="game-result">
-    <p className="eyebrow case-closed-stamp"><ShieldCheck size={17} aria-hidden="true" /> Case closed</p>
-    <h2>{ending[0]}</h2>
-    <figure className="case-dialogue case-recording"><figcaption>Dad’s last recording</figcaption><blockquote>{ending[1]}</blockquote></figure>
+  return <>
+    <p className="eyebrow case-closed-stamp">Case closed</p>
+    <h2>{ending.title}</h2><p>{ending.text}</p>
     <div className="button-row">
       <button className="button primary" onClick={onChooseAgain}>Try another ending</button>
       <button className="button secondary" onClick={onRestart}>Restart investigation</button>
+      <Link className="text-link" to="/collection">Open memory collection</Link>
     </div>
-  </div>;
+  </>;
 }

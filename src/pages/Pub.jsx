@@ -63,10 +63,14 @@ function Notebook() {
 
 function Booth() {
   const [message, setMessage] = useState('');
+  const { state, unlock } = useArchive();
   return <><p>Aunt Lily saved the corner table. Your sibling has already checked the seat cushions. You get to ask the questions.</p>
-    <div className="choice-grid"><button className="choice" onClick={() => setMessage('Aunt Lily: “The photo went into a drawer. Your dad likes dates with sentimental value. Start with the oldest season file.”')}>Ask about the photograph</button>
+    <div className="choice-grid"><button className="choice" onClick={() => setMessage('Aunt Lily: “Start with the signed records. Your dad can remember every drink and still get the order wrong.”')}>Ask about The Fifth Alibi</button>
       <button className="choice" onClick={() => setMessage('Aunt Lily: “The umbrella had a lost-and-found tag. Check the street outside the archive. He spent three paragraphs describing the rain.”')}>Ask about the umbrella</button></div>
-    {message && <p className="note" aria-live="polite">{message}</p>}</>;
+    {message && <p className="note" aria-live="polite">{message}</p>}
+    <button className="button secondary" disabled={state.unlocked.includes('photo')} onClick={() => unlock('photo')}>
+      {state.unlocked.includes('photo') ? 'Booth photograph recovered' : 'Inspect the booth photograph'}
+    </button></>;
 }
 
 export default function Pub() {
@@ -100,8 +104,8 @@ export default function Pub() {
       </div>
       <section className="panel pub-inspector" key={object} id="pub-inspector" tabIndex={-1}><p className="eyebrow">Behind the bar</p><h2>{active[1]}</h2>
         {Screen && <Screen />}
-        {object === 'envelope' && <><p className="note">The seal breaks cleanly. Barney has marked the envelope “For the Mosby kids.” Inside is a note about the locked drawer under the booth. Your sibling circles “under” twice.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
-        {object === 'suitcase' && <><p>{envelope ? 'Inside, you find a notebook full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
+        {object === 'envelope' && <><p className="note">The seal breaks cleanly. Barney marked the envelope “For the Mosby kids.” The file inside refers to a missing Playbook page called The Fifth Alibi.</p><Link to="/story" className="button secondary">Return to the investigation</Link></>}
+        {object === 'suitcase' && <><p>{envelope ? 'Inside is Barney’s decision game, full of complicated alternatives to a perfectly normal evening.' : 'The suitcase is wedged beneath the seat. Look for the matching seal on the table.'}</p>
           {envelope && <Link to="/games?game=playbook" className="button primary">Open the Playbook</Link>}</>}
       </section>
     </div>

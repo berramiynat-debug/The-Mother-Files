@@ -12,7 +12,7 @@ test('the intro can pause, jump to a scene, and resume without skipping the stor
   await expect(intro.getByRole('button', { name: 'Scene 4: Legendary' })).toHaveAttribute('aria-current', 'step');
   await intro.getByRole('button', { name: 'Resume intro' }).click();
   await page.clock.fastForward(1250);
-  await expect(intro.getByRole('heading', { name: 'Two things are missing.' })).toBeVisible();
+  await expect(intro.getByRole('heading', { name: 'A page has gone missing.' })).toBeVisible();
   await intro.getByRole('link', { name: 'Play the mystery' }).click();
   await expect(page.getByRole('button', { name: 'Open Barney’s envelope' })).toBeVisible();
 });

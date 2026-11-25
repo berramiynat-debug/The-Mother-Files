@@ -15,7 +15,7 @@ export const memories = [
   ['narrator', 'Recovered voice', 'You recognized who was talking.'],
   ['episode', 'Screening room', 'You matched at least seven fragments to the right episode.'],
   ['reaction', 'Perfect timing', 'You caught the signal inside the target zone.'],
-  ['photo', 'Corner booth photograph', 'You and your sibling found the print in the locked drawer below the booth.'],
-  ['envelope', 'The wax seal', 'The envelope points to a locker under the booth.'],
+  ['photo', 'Corner booth photograph', 'An old print from the corner booth at MacLaren’s.'],
+  ['envelope', 'The wax seal', 'Barney marked the envelope “For the Mosby kids.”'],
   ['secret', 'One last seat', 'You saved a seat for Dad. This time, you two got to tell the story.'],
 ].map(([id, title, description]) => ({ id, title, description }));

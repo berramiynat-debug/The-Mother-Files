@@ -21,7 +21,7 @@ export default function Evidence() {
   function connect() {
     if (selected.length !== 3) return;
     set('connections', (items) => items.includes(season) ? items : [...items, season]);
-    setNote(season === 1 ? 'The connection is saved. Your sibling circles the air date for the drawer code.' : 'The connection is saved. The drawer clue is in the first season’s file.');
+    setNote('The connection is saved. You can review this season’s records anytime.');
   }
 
   return <section className="wrap page">
@@ -46,7 +46,7 @@ export default function Evidence() {
         <div className="button-row evidence-actions"><button className="button primary" disabled={selected.length !== 3} onClick={connect}><Link2 size={18} /> Connect the records</button>
           <Link className="button secondary" to="/story">Return to the case</Link></div>
         {(note || connected) && <p className="note" role="status">{note || 'This season thread is connected.'}</p>}
-        <p className="credit">Episode, date, and character records supplied by TVmaze. Witness assignments are part of the original mystery.</p>
+        <p className="credit">TVmaze supplies the episode, date, and character records. Witness assignments are original to this archive activity.</p>
       </>}
     </Status>
   </section>;

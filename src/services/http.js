@@ -9,19 +9,27 @@ export class ProviderError extends Error {
   }
 }
 
-async function fetchJson(url, source, { timeout, retries }) {
+async function fetchJson(url, source, { timeout, retries, signal, ...options }) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     let error;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(timeout), headers: { Accept: 'application/json' } });
+      const deadline = AbortSignal.timeout(timeout);
+      const res = await fetch(url, { ...options, signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
+        headers: { Accept: 'application/json', ...options.headers } });
       if (!res.ok) throw new ProviderError(source, 'The provider returned HTTP ' + res.status + '.', res.status);
       return await res.json();
     } catch (cause) {
+      if (signal?.aborted) throw cause;
       error = cause instanceof ProviderError ? cause : new ProviderError(source, 'The provider did not return readable data.');
     }
     if (attempt === retries || (error.status >= 400 && error.status < 500 && error.status !== 429)) throw error;
     await new Promise((resolve) => setTimeout(resolve, 300 * 2 ** attempt));
   }
+}
+
+export function postJson(url, source, body, { signal, timeout = 6500 } = {}) {
+  return fetchJson(url, source, { timeout, retries: 0, signal, method: 'POST',
+    body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
 }
 
 export async function request(url, source, { ttl = 300_000, timeout = 6500, retries = 1 } = {}) {

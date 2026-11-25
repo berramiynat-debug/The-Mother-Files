@@ -22,3 +22,22 @@ test('responsive navigation, intro dismissal, and zero horizontal overflow', asy
   await expect(page.locator('.pub-scene')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize().width);
 });
+
+test('notebook keeps evidence available and fits narrow screens', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => localStorage.setItem('mother-files-v1', JSON.stringify({ introSeen: true })));
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/story');
+  const launcher = page.getByRole('button', { name: 'Need a hint?' });
+  await launcher.press('Enter');
+  const panel = page.getByRole('region', { name: 'The Mosby Margins' });
+  await expect(panel).toBeVisible();
+  const bounds = await panel.boundingBox();
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
+  await expect(page.getByRole('checkbox', { name: 'Cite Marshall’s custody sheet' })).toBeVisible();
+  await page.getByRole('button', { name: 'Minimize notebook' }).click();
+  await expect(launcher).toBeFocused();
+});

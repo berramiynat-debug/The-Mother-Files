@@ -16,6 +16,7 @@ const providers = [
   ['HIMYM Character API', 'Community alias and occupation records, plus short random quotes.', 'https://github.com/hrithik73/himym-api', 'Used via public GET endpoints. Cast attribution comes from TVmaze.'],
   ['MacLaren’s Pub API', 'Reviewed FastAPI reference project.', 'https://github.com/aashikmathew/himym-maclarens-api', 'The pub uses independently written fiction and chimes.'],
   ['HIMYM Archive API', 'Reviewed Flask reference project.', 'https://github.com/joshshep97/himym_api', 'The evidence board uses first-party TVmaze requests through an independent adapter.'],
+  ['GroqCloud', 'Optional custom-question routing for The Mosby Margins.', 'https://console.groq.com/docs/model/openai/gpt-oss-20b', 'Groq classifies case questions. The game chooses approved hints and offers guided help offline.'],
 ];
 const stateLabel = (resource) => resource.loading ? 'Checking' : resource.error ? 'Unavailable' : 'Healthy';
 
@@ -29,7 +30,7 @@ function CaseFile() {
         [Archive, 'React routes', 'Resource hooks handle requests. Context stores local progress.']].map(([Icon, title, copy]) =>
         <li key={title}><Icon size={23} /><h3>{title}</h3><p>{copy}</p></li>)}
     </ol>
-    <p>React Router handles dynamic URLs and lazy routes. Request caching belongs to the provider layer. Spoiler decisions are made at each display surface.</p>
+    <p>React Router handles dynamic URLs and lazy routes. Request caching belongs to the provider layer. The optional notebook sends custom questions and reviewed case context through a separate server endpoint. Its replies never change case progress.</p>
   </section>;
 }
 
@@ -84,20 +85,24 @@ export function Sources() {
   const [code, setCode] = useState('');
   const [feedback, setFeedback] = useState('');
   const visual = tmdbImage(images.data?.backdrops?.[0] || show.data?.backdrop, 'w780');
-  const status = [
-    stateLabel(integrity), stateLabel(show), integrity.loading ? 'Checking' : integrity.data?.identityHealthy ? 'Healthy' : 'Unavailable',
-    'Local reference', 'Local reference',
-  ];
+  const statuses = new Map([
+    ['TVmaze', stateLabel(integrity)], ['TMDB', stateLabel(show)],
+    ['HIMYM Character API', integrity.loading ? 'Checking' : integrity.data?.identityHealthy ? 'Healthy' : 'Unavailable'],
+    ['GroqCloud', 'Optional · on demand'],
+  ]);
 
   return <section className="wrap page">
     <PageHeading eyebrow="Engineering & credits" title="Archive integrity." description="Here’s where I got the records. When two sources disagree, check who actually keeps the original credit." />
     <div className="grid md:grid-cols-2 gap-4 source-grid">
-      {providers.map(([name, purpose, url, rights], index) => <article className="panel source" key={name}>
-        <span className={'health ' + (status[index] === 'Healthy' ? 'healthy' : '')}><Radio size={14} /> {status[index]}</span>
-        <h2>{name}</h2><p>{purpose}</p>
-        {name === 'TMDB' && <a className="tmdb-logo" href="https://www.themoviedb.org" target="_blank" rel="noreferrer"><img src="/tmdb.svg" alt="The Movie Database" width="96" /></a>}
-        <p className="credit">{rights}</p><a className="text-link" href={url} target="_blank" rel="noreferrer">Provider documentation</a>
-      </article>)}
+      {providers.map(([name, purpose, url, rights]) => {
+        const status = statuses.get(name) ?? 'Local reference';
+        return <article className="panel source" key={name}>
+          <span className={'health ' + (status === 'Healthy' ? 'healthy' : '')}><Radio size={14} aria-hidden="true" /> {status}</span>
+          <h2>{name}</h2><p>{purpose}</p>
+          {name === 'TMDB' && <a className="tmdb-logo" href="https://www.themoviedb.org" target="_blank" rel="noreferrer"><img src="/tmdb.svg" alt="The Movie Database" width="96" /></a>}
+          <p className="credit">{rights}</p><a className="text-link" href={url} target="_blank" rel="noreferrer">Provider documentation</a>
+        </article>;
+      })}
     </div>
     <section className="panel">
       <p className="eyebrow">Field-level comparison</p><h2>Cast attribution</h2>
@@ -124,7 +129,7 @@ export function About() {
     <div className="panel"><Umbrella size={29} /><h2>One show, two ways in.</h2>
       <p>Browse the TVmaze series records or play an original story as one of Ted’s children. Ted narrates the investigation, and your sibling helps you check his version against the evidence.</p>
       <p>This educational fan project is independent of the show’s rights holders. The original mystery, illustrations, and sounds were made for this project.</p>
-      <div className="button-row"><Link className="button secondary" to="/sources">Sources and attribution</Link><Link className="button secondary" to="/story">The missing umbrella</Link></div>
+      <div className="button-row"><Link className="button secondary" to="/sources">Sources and attribution</Link><Link className="button secondary" to="/story">The Play That Never Happened</Link></div>
     </div><Ambiguity />
   </section>;
 }
