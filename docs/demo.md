@@ -31,7 +31,7 @@ Players must cite Marshall’s sheet and Barney’s correction for the headcount
 
 ## Verification results
 
-The clean install, production build, and lint passed, along with 31 Vitest tests and 24 Playwright tests. The browser suite covers concurrent archive updates and reset across tabs, direct episode links during a list outage, keyboard route focus and titles, and stronger hints after reading evidence. Edge production-preview checks covered home, the investigation, and the open notebook at 320, 375, 390, 768, 1024, and 1440 px. The preview returned HTTP 503 without a Groq credential. A separate live request through the shared server handler returned HTTP 200.
+The production build and lint passed, along with 34 Vitest tests and 25 Playwright tests. The browser suite covers concurrent archive updates and reset across tabs, direct episode links during a list outage, keyboard route focus and titles, stronger hints after reading evidence, and distinct custom-question replies during a provider outage. Edge production-preview checks covered home, the investigation, and the open notebook at 320, 375, 390, 768, 1024, and 1440 px. The preview returned HTTP 503 without a Groq credential. A separate live request through the shared server handler returned HTTP 200.
 
 ## A four-minute walkthrough
 

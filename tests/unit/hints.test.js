@@ -2,6 +2,7 @@ import { Readable } from 'node:stream';
 import { describe, expect, it, vi } from 'vitest';
 import { createHintBudget, hintResponse } from '../../server/hints.js';
 import { buildHintContext, guidedHint, validateHintRequest } from '../../src/features/story/hints/hintContext.js';
+import { fallbackQuestionReply } from '../../src/features/story/hints/customHints.js';
 
 const env = { GROQ_API_KEY: 'fixture' };
 const state = { chapter: 'signatures', evidence: ['custody'], completed: [], spoilers: false, level: 1, question: 'What record helps here?' };
@@ -24,6 +25,16 @@ describe('notebook context', () => {
     expect(buildHintContext(next).interactions).toContain('Order recorded events');
   });
 
+  it('uses the question for fallback replies and withholds facts from unopened records', () => {
+    const question = 'Marshall’ın tutanağında kaç imza var?';
+    expect(fallbackQuestionReply(state, question)).toMatch(/beş imza/);
+    expect(fallbackQuestionReply({ ...state, evidence: [] }, question)).toMatch(/doğrulayamıyorum/);
+    expect(fallbackQuestionReply(state, 'Neyi karşılaştırmalıyım?')).toMatch(/İmzaları ve imza atan kişileri ayrı ayrı say/);
+    expect(fallbackQuestionReply(state, 'Hangi kanıta bakmalıyım?')).toMatch(/Barney’nin imzalı açıklaması/);
+    expect(fallbackQuestionReply({ ...state, evidence: ['custody', 'aliases'] }, 'Which documents should I cite?')).toMatch(/Use the Cite boxes/);
+    expect(fallbackQuestionReply(state, 'How many people signed?')).not.toMatch(/five signatures on Marshall/);
+  });
+
   it.each([
     { chapter: 'unknown' }, { chapter: 'verdict' }, { evidence: ['unknown'] }, { evidence: ['aliases', 'note'] },
     { evidence: ['custody', 'custody'] }, { completed: ['headcount'] }, { question: ' ' },
@@ -41,14 +52,43 @@ describe('Groq proxy', () => {
       expect(url).toBe('https://api.groq.com/openai/v1/chat/completions');
       expect(options.headers.Authorization).toBe('Bearer fixture');
       const body = JSON.parse(options.body);
-      expect(body).toMatchObject({ model: 'openai/gpt-oss-20b', max_completion_tokens: 128 });
+      expect(body).toMatchObject({ model: 'openai/gpt-oss-20b', max_completion_tokens: 256 });
       expect(JSON.parse(body.messages[1].content).question).toBe(state.question);
+      expect(body.response_format.json_schema.schema.properties.topic.enum).toContain('signature-count');
+      expect(body.response_format.json_schema.schema.properties.topic.enum).not.toContain('ted-arrival');
       expect(body).not.toHaveProperty('tools');
       return classification('{"topic":"evidence","language":"tr"}');
     });
     const result = await hintResponse(request, env, { budget: budgets(), fetcher });
     expect(fetcher).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ status: 200, body: { source: 'ai', text: expect.stringMatching(/tutanağa/) }, headers: { 'Cache-Control': 'no-store' } });
+    expect(result).toMatchObject({ status: 200, body: { source: 'ai', text: expect.stringMatching(/Barney’nin imzalı açıklaması/) }, headers: { 'Cache-Control': 'no-store' } });
+  });
+
+  it('returns distinct answers for facts, reasoning, and which record to inspect in the same case state', async () => {
+    const questions = [
+      ['Marshall’ın tutanağında kaç imza var?', 'signature-count', /beş imza/],
+      ['Neyi karşılaştırmalıyım?', 'reason', /İmzaları ve imza atan kişileri ayrı ayrı say/],
+      ['Hangi kanıta bakmalıyım?', 'evidence', /Barney’nin imzalı açıklaması/],
+    ];
+    const replies = [];
+    for (const [question, topic, text] of questions) {
+      const fetcher = vi.fn(async (_, { body }) => {
+        const request = JSON.parse(JSON.parse(body).messages[1].content);
+        expect(request.question).toBe(question);
+        expect(request.availableReplies).toHaveProperty(topic);
+        expect(request.availableReplies).not.toHaveProperty('alias-correction');
+        return classification(JSON.stringify({ topic, language: 'tr' }));
+      });
+      const result = await hintResponse(http({ ...state, question }), env, { fetcher, budget: budgets() });
+      expect(result).toMatchObject({ status: 200, body: { source: 'ai', text: expect.stringMatching(text) } });
+      replies.push(result.body.text);
+    }
+    expect(new Set(replies).size).toBe(questions.length);
+  });
+
+  it('rejects a provider choice tied to an unopened record even when its identifier is valid', async () => {
+    const fetcher = async () => classification('{"topic":"alias-correction","language":"en"}');
+    expect((await hintResponse(http(), env, { fetcher, budget: budgets() })).status).toBe(502);
   });
 
   it('blocks overrides locally and rejects free-form model output', async () => {

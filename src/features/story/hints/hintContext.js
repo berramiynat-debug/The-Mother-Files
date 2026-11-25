@@ -2,7 +2,6 @@ import { chapters, claims, exhibits } from '../../../data/investigation.js';
 import { beginCase, firstInvestigation } from '../logic.js';
 
 export const questionLimit = 400;
-export const topics = ['next', 'small', 'evidence', 'reason', 'off-topic'];
 
 const chapterHints = {
   signatures: [
@@ -31,7 +30,6 @@ const generic = {
   inspect: ['I’d read the remaining records before making the call.', 'Karar vermeden önce kalan belgeleri okurdum.'],
   evidence: ['Reopen the records beside the deduction and compare what each can establish.', 'Çıkarımın yanındaki belgeleri yeniden aç ve her birinin neyi kanıtladığına bak.'],
   next: ['Choose the claim the records support, cite the relevant records, then check your deduction.', 'Belgelerin desteklediği iddiayı seç, ilgili belgeleri işaretle ve çıkarımını kontrol et.'],
-  reason: ['Check whether the records support the claim and whether you cited every part of the proof.', 'Belgelerin iddiayı destekleyip desteklemediğine ve kanıtın her parçasını işaretlediğine bak.'],
   solved: ['We’ve checked this deduction. Use the next action in the case file.', 'Bu çıkarımı kontrol ettik. Dosyada gösterilen bir sonraki adımı kullan.'],
   unrelated: ['I’m keeping these margins for the case. Ask me about a record or what to do next.', 'Bu defteri soruşturma için tutuyorum. Bir belgeyi veya sıradaki adımı sorabilirsin.'],
 };
@@ -54,15 +52,18 @@ export function validateHintRequest(body) {
   return { ...hintRequestState(progress, body.spoilers, body.level), question: body.question.trim() };
 }
 
-export function buildHintContext(state) {
-  const index = chapters.findIndex(({ id }) => id === state.chapter);
-  const chapter = chapters[index];
-  const solved = state.completed.includes(chapter.deduction.id);
+export function reviewedHintRecords(state) {
+  const chapter = chapters.find(({ id }) => id === state.chapter);
   const available = new Set([...chapter.discover, ...chapter.deduction.sources, ...(chapter.compare ?? [])]);
-  const evidence = state.evidence.filter((id) => available.has(id));
+  return state.evidence.filter((id) => available.has(id));
+}
+
+export function buildHintContext(state) {
+  const chapter = chapters.find(({ id }) => id === state.chapter);
+  const solved = state.completed.includes(chapter.deduction.id);
   return {
     chapter: chapter.id, objective: chapter.goal,
-    evidence: evidence.map((id) => ({ title: exhibits[id].title, text: exhibits[id].text })),
+    evidence: reviewedHintRecords(state).map((id) => ({ id, title: exhibits[id].title, text: exhibits[id].text })),
     completed: chapters.filter(({ deduction }) => state.completed.includes(deduction.id)).map(({ deduction }) => deduction.confirmed),
     interactions: solved ? ['Use the next action in the case file'] :
       ['Cite reviewed records', 'Check a deduction', ...(chapter.discover.some((id) => !state.evidence.includes(id)) ? ['Inspect unread records'] : []),
@@ -90,12 +91,12 @@ export function guidedHint(state, topic, language = 'en', role = 'questions') {
       'Ben babamdan beklemesini isterim. Her belgenin neyi kanıtladığını defterine yaz.'];
   }
   else if (topic === 'evidence') line = missing ? chapterHints[state.chapter][0] : generic.evidence;
-  else if (topic === 'reason') line = missing ? generic.inspect : state.level === 1 ? generic.reason : line;
+  else if (topic === 'reason') line = missing || state.level === 1 ? chapterHints[state.chapter][1] : line;
   return line[language === 'tr' ? 1 : 0];
 }
 
 export function questionLanguage(text) {
-  return /[çğıöşü]|\b(?:ne|nasıl|hangi|neden|ipucu|bir|kanıt|sonra|yardım)\b/iu.test(text) ? 'tr' : 'en';
+  return /[çğıöşü]|\b(?:ne|nasil|hangi|neden|kac|kim|ipucu|bir|kanit|sonra|yardim|imza)\b/iu.test(text) ? 'tr' : 'en';
 }
 
 export function isInstructionOverride(text) {

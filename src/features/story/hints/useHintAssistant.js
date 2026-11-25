@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { askNotebook } from '../../../services/providers/hintService.js';
+import { fallbackQuestionReply } from './customHints.js';
 import { availableHintLevel, containsCredential, guidedHint, hintRequestState, isInstructionOverride, questionLanguage, questionLimit } from './hintContext.js';
 
 export function useHintAssistant(progress, spoilers) {
@@ -57,7 +58,7 @@ export function useHintAssistant(progress, spoilers) {
     } catch (error) {
       if (controller.signal.aborted) return;
       const note = error.status === 429 ? 'The AI notebook is busy. Here’s a guided hint.' : 'The AI notebook is unavailable. Here’s a guided hint.';
-      append(question, guidedHint(state, 'small', language), 'guided', note);
+      append(question, fallbackQuestionReply(state, question), 'guided', note);
       setRetry(question);
     } finally {
       if (active.current === controller && !controller.signal.aborted) {

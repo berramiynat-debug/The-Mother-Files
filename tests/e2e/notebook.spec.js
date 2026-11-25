@@ -93,10 +93,25 @@ test('rate limit uses a guided reply and retry recovers with one request at a ti
   expect(posts).toBe(1);
   release();
   await expect(log.getByText(/AI notebook is busy/)).toBeVisible();
-  await expect(log.getByText(/Önce tutanağa bak/)).toBeVisible();
+  await expect(log.getByText(/Marshall’ın imza tutanağı ve Barney’nin imzalı açıklaması/)).toBeVisible();
   await page.getByRole('button', { name: 'Retry AI hint' }).click();
   await expect(log.getByText('Tutanağı aç ve imzaları incele.')).toBeVisible();
   expect(posts).toBe(2);
+});
+
+test('custom notebook questions get different guided answers during a provider outage', async ({ page }) => {
+  await page.route('**/api/hints', (route) => route.fulfill({ status: 503, json: { error: 'AI notebook unavailable' } }));
+  const { question, send, log } = await start(page);
+  await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
+  for (const [text, reply] of [
+    ['Marshall’ın tutanağında kaç imza var?', /Marshall’ın imza tutanağında beş imza/],
+    ['Hangi kanıta bakmalıyım?', /henüz bakman gerekenler arasında Barney’nin imzalı açıklaması/],
+  ]) {
+    await question.fill(text);
+    await send.click();
+    await expect(log.getByText(reply)).toBeVisible();
+  }
+  await expect(log.getByText(/AI notebook is unavailable/)).toHaveCount(2);
 });
 
 test('missing credentials and navigation during a request leave the saved case intact', async ({ page }) => {
