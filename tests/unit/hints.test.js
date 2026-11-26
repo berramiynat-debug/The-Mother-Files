@@ -56,7 +56,7 @@ describe('Groq proxy', () => {
       expect(url).toBe('https://api.groq.com/openai/v1/chat/completions');
       expect(options.headers.Authorization).toBe('Bearer fixture');
       const body = JSON.parse(options.body);
-      expect(body).toMatchObject({ model: 'openai/gpt-oss-20b', max_completion_tokens: 512 });
+      expect(body).toMatchObject({ model: 'openai/gpt-oss-20b', max_completion_tokens: 1024, reasoning_effort: 'medium' });
       expect(JSON.parse(body.messages[1].content)).toEqual({ history: [], question: state.question });
       expect(body.messages[0].content).toContain('Five signatures: Marshall Eriksen');
       expect(body.messages[0].content).not.toContain('Lorenzo is one of my aliases');
