@@ -16,7 +16,7 @@ const providers = [
   ['HIMYM Character API', 'Community alias and occupation records, plus short random quotes.', 'https://github.com/hrithik73/himym-api', 'Used via public GET endpoints. Cast attribution comes from TVmaze.'],
   ['MacLaren’s Pub API', 'Reviewed FastAPI reference project.', 'https://github.com/aashikmathew/himym-maclarens-api', 'The pub uses independently written fiction and chimes.'],
   ['HIMYM Archive API', 'Reviewed Flask reference project.', 'https://github.com/joshshep97/himym_api', 'The evidence board uses first-party TVmaze requests through an independent adapter.'],
-  ['GroqCloud', 'Optional custom-question routing for The Mosby Margins.', 'https://console.groq.com/docs/model/openai/gpt-oss-20b', 'Groq classifies case questions. The game chooses approved hints and offers guided help offline.'],
+  ['GroqCloud', 'Optional conversation in The Mosby Margins.', 'https://console.groq.com/docs/model/openai/gpt-oss-20b', 'Groq writes replies using reviewed case notes and recent chat. Guided hints work offline.'],
 ];
 const stateLabel = (resource) => resource.loading ? 'Checking' : resource.error ? 'Unavailable' : 'Healthy';
 
@@ -30,7 +30,7 @@ function CaseFile() {
         [Archive, 'React routes', 'Resource hooks handle requests. Context stores local progress.']].map(([Icon, title, copy]) =>
         <li key={title}><Icon size={23} /><h3>{title}</h3><p>{copy}</p></li>)}
     </ol>
-    <p>React Router handles dynamic URLs and lazy routes. Request caching belongs to the provider layer. The optional notebook sends custom questions and reviewed case context through a separate server endpoint. Its replies never change case progress.</p>
+    <p>React Router handles dynamic URLs and lazy routes. Request caching belongs to the provider layer. The optional notebook sends custom questions, recent chat, and reviewed case context through a separate server endpoint. Only actions on the case screen update progress.</p>
   </section>;
 }
 

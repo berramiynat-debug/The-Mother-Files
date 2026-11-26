@@ -31,7 +31,7 @@ Players must cite Marshall’s sheet and Barney’s correction for the headcount
 
 ## Verification results
 
-The production build and lint passed, along with 34 Vitest tests and 25 Playwright tests. The browser suite covers concurrent archive updates and reset across tabs, direct episode links during a list outage, keyboard route focus and titles, stronger hints after reading evidence, and distinct custom-question replies during a provider outage. Edge production-preview checks covered home, the investigation, and the open notebook at 320, 375, 390, 768, 1024, and 1440 px. The preview returned HTTP 503 without a Groq credential. A separate live request through the shared server handler returned HTTP 200.
+The browser suite checks concurrent archive updates across tabs, direct episode links during a list outage, keyboard route focus, stronger hints after reading evidence, and the notebook’s conversation history and record references. It also covers question-aware replies during a provider outage. Edge production-preview checks covered home, the investigation, and the open notebook at 320, 375, 390, 768, 1024, and 1440 px.
 
 ## A four-minute walkthrough
 
@@ -39,7 +39,7 @@ The production build and lint passed, along with 34 Vitest tests and 25 Playwrig
 2. Open **Characters**, then **Barney Stinson**. File **Swarley**, use **Suit up**, and show the unlocked memories in **Collection**.
 3. Open **Sources & credits** and show the **Marshall Eriksen** actor conflict. Enter `3355` in the restricted file field to show the API flow, optional provider status, and normalized ownership.
 4. Open **The Pub**, find the sealed envelope, and try the suitcase or telephone. Show the **Evidence Board** and pin all three records. On **Games**, play one clue in **Guess the Episode** and use **Space** for **Slap Bet**.
-5. Open **The Mystery**, read the envelope and correction, and cite both to check the first deduction. Open **Need a hint?** with the keyboard. Try a guided hint, then send a custom case question if the optional Groq credential is configured.
+5. Open **The Mystery**, read the envelope and correction, and cite both to check the first deduction. Open **Need a hint?** with the keyboard. Try a guided hint. With Groq configured, ask about the custody sheet and follow up with “What does that tell us?”
 
 ## Code walkthrough
 
@@ -51,7 +51,7 @@ The production build and lint passed, along with 34 Vitest tests and 25 Playwrig
 | `src/context/ArchiveProvider.jsx` and `src/data` | Context persists favorites, progress, and memories in localStorage. The data files define the original story chapters, Playbook decisions, and collectible descriptions. |
 | `src/styles/main.css` and component class names | Tailwind provides shared spacing, cards, and responsive layouts. Scene gradients, custom animation keyframes, and illustrated props use CSS. |
 | `vercel.json` → `api/tmdb.js` → `server/tmdb.js` | Vercel serves the React entry point for deep links. The TMDB function uses a server-side credential. TVmaze still supplies the wiki when the optional TMDB credential is absent. |
-| `HintNotebook.jsx` → `/api/hints` → `server/hints.js` | The notebook keeps temporary conversation state. The server reconstructs clue context and uses Groq to choose among approved hint topics. |
+| `HintNotebook.jsx` → `/api/hints` → `server/hints.js` | The notebook sends recent exchanges. The server supplies reviewed clues, requests a generated reply, and checks the cited record IDs. |
 
 <details>
 <summary>Case and secret walkthrough</summary>

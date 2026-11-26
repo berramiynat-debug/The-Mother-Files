@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { askNotebook } from '../../../services/providers/hintService.js';
 import { fallbackQuestionReply } from './customHints.js';
-import { availableHintLevel, containsCredential, guidedHint, hintRequestState, isInstructionOverride, questionLanguage, questionLimit } from './hintContext.js';
+import { availableHintLevel, containsCredential, guidedHint, hintHistoryLimit, hintRequestState, isInstructionOverride, questionLanguage, questionLimit } from './hintContext.js';
 
 export function useHintAssistant(progress, spoilers) {
   const [turns, setTurns] = useState([]);
@@ -13,9 +13,9 @@ export function useHintAssistant(progress, spoilers) {
 
   useEffect(() => () => active.current?.abort(), []);
 
-  function append(question, text, source, note) {
+  function append(question, text, source, { note, records } = {}) {
     const id = ++sequence.current;
-    setTurns((items) => [...items.slice(-5), { id, question, text, source, note }]);
+    setTurns((items) => [...items.slice(-5), { id, question, text, source, note, records }]);
   }
 
   function quick(topic, label, requestedLevel = level) {
@@ -52,13 +52,15 @@ export function useHintAssistant(progress, spoilers) {
     const controller = new AbortController();
     active.current = controller;
     setPending(true);
+    const history = turns.filter(({ source }) => source === 'ai').slice(-hintHistoryLimit)
+      .map(({ question, text }) => ({ question, text }));
     try {
-      const reply = await askNotebook(state, question, controller.signal);
-      if (!controller.signal.aborted) append(question, reply.text, reply.source);
+      const reply = await askNotebook(state, question, history, controller.signal);
+      if (!controller.signal.aborted) append(question, reply.text, reply.source, { records: reply.records });
     } catch (error) {
       if (controller.signal.aborted) return;
       const note = error.status === 429 ? 'The AI notebook is busy. Here’s a guided hint.' : 'The AI notebook is unavailable. Here’s a guided hint.';
-      append(question, fallbackQuestionReply(state, question), 'guided', note);
+      append(question, fallbackQuestionReply(state, question), 'guided', { note });
       setRetry(question);
     } finally {
       if (active.current === controller && !controller.signal.aborted) {

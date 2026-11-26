@@ -42,7 +42,7 @@ export default function HintNotebook({ progress, spoilers, incorrect }) {
     <div id={panelId} hidden={!open}>
       {open && <section className="hint-notebook" aria-labelledby={headingId}>
         <header>
-          <div><h3 id={headingId}>The Mosby Margins</h3><p>Every good story needs a second opinion.</p></div>
+          <div><h3 id={headingId}>The Mosby Margins</h3><p>Ask about a clue or follow up on a reply.</p></div>
           <button type="button" ref={minimize} className="hint-minimize" onClick={close} aria-label="Minimize notebook"><Minus size={19} /></button>
         </header>
         <div className="hint-prompts" role="group" aria-label="Guided hints">
@@ -54,10 +54,11 @@ export default function HintNotebook({ progress, spoilers, incorrect }) {
           {turns.map((turn) => <div key={turn.id} className="hint-turn">
             <p className="hint-question">{turn.question}</p>
             <p>{turn.text}</p>
-            <p className="hint-source">{turn.note || (turn.source === 'ai' ? 'AI-selected hint' : 'Guided hint')}</p>
+            <p className="hint-source">{turn.note || (turn.source === 'ai' ? 'AI reply' : 'Guided hint')}</p>
+            {turn.records?.length > 0 && <p className="hint-source">Records · {turn.records.join(' · ')}</p>}
           </div>)}
         </div>
-        <p id={panelId + '-privacy'} className="hint-source">Custom questions go to Groq, an external AI provider. Guided hints work offline.</p>
+        <p id={panelId + '-privacy'} className="hint-source">Groq receives custom questions, recent chat, and reviewed case notes. Guided hints work offline.</p>
         <form onSubmit={(event) => {
           event.preventDefault();
           if (!question.trim() || pending) return;
@@ -72,7 +73,7 @@ export default function HintNotebook({ progress, spoilers, incorrect }) {
           </div>
         </form>
         {pending && <p role="status" className="hint-source">Checking the margins…</p>}
-        {retry && !pending && <button type="button" className="hint-retry" onClick={() => ask(retry)}>Retry AI hint</button>}
+        {retry && !pending && <button type="button" className="hint-retry" onClick={() => ask(retry)}>Retry question</button>}
       </section>}
     </div>
   </div>;

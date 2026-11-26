@@ -33,7 +33,7 @@ test('keyboard, progressive guided hints, safe text, and progress isolation', as
   await page.route('**/api/hints', async (route) => {
     posts++;
     expect(route.request().postDataJSON()).toEqual({
-      chapter: 'signatures', evidence: ['custody', 'aliases'], completed: [], spoilers: false, level: 3, question: 'What wording helps?',
+      chapter: 'signatures', evidence: ['custody', 'aliases'], completed: [], spoilers: false, level: 3, question: 'What wording helps?', history: [],
     });
     await route.fulfill({ json: { source: 'ai', text: '<img src=x onerror=alert(1)> Plain text.' } });
   });
@@ -65,10 +65,44 @@ test('keyboard, progressive guided hints, safe text, and progress isolation', as
   await send.click();
   await expect(log.getByText('<img src=x onerror=alert(1)> Plain text.')).toBeVisible();
   await expect(log.locator('img')).toHaveCount(0);
-  await expect(log.getByText('AI-selected hint')).toBeVisible();
+  await expect(log.getByText('AI reply')).toBeVisible();
   await minimize.click();
   await expect(launcher).toBeFocused();
   expect(await page.evaluate(() => localStorage.getItem('mother-files-v1'))).toBe(storageBefore);
+});
+
+test('custom follow-ups carry the last three exchanges and display the reviewed records', async ({ page }) => {
+  const exchange = [
+    { question: 'Marshall’ın tutanağında kaç imza var?', text: 'Burada beş imza görüyorum.' },
+    { question: 'Peki bu neyi kanıtlıyor?', text: 'Tutanak beş imza olduğunu gösteriyor. Ayrı kişileri saymak için başka bir belgeyi de kontrol edelim.' },
+    { question: 'Hangisine bakayım?', text: 'Barney’nin imzalı açıklamasını açalım. İsimlerden biri hakkında işimize yarayabilir.' },
+    { question: 'Sonra ne yapalım?', text: 'Açıklamadaki isimleri tutanağın son iki satırıyla karşılaştır.' },
+    { question: 'Bir daha söyler misin?', text: 'Tabii. İki kaydı yan yana aç, sonra imzaları sırayla kontrol et.' },
+  ];
+  let sent = 0;
+  await page.route('**/api/hints', async (route) => {
+    const index = sent++;
+    const { question, text } = exchange[index];
+    expect(route.request().postDataJSON()).toMatchObject({
+      chapter: 'signatures', evidence: ['custody'], question, history: exchange.slice(Math.max(0, index - 3), index),
+    });
+    await route.fulfill({ json: { source: 'ai', text, records: index === 0 ? ['Marshall’s custody sheet'] : [] } });
+  });
+  const { launcher, question, send, log } = await start(page);
+  await launcher.click();
+  await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
+  await launcher.click();
+  for (const [index, turn] of exchange.entries()) {
+    await question.fill(turn.question);
+    await send.click();
+    await expect(log.getByText(turn.text, { exact: true })).toBeVisible();
+    if (index === 0) {
+      await expect(log.getByText('Records · Marshall’s custody sheet')).toBeVisible();
+      await launcher.click();
+      await launcher.click();
+    }
+  }
+  expect(sent).toBe(exchange.length);
 });
 
 test('rate limit uses a guided reply and retry recovers with one request at a time', async ({ page }) => {
@@ -94,7 +128,7 @@ test('rate limit uses a guided reply and retry recovers with one request at a ti
   release();
   await expect(log.getByText(/AI notebook is busy/)).toBeVisible();
   await expect(log.getByText(/Marshall’ın imza tutanağı ve Barney’nin imzalı açıklaması/)).toBeVisible();
-  await page.getByRole('button', { name: 'Retry AI hint' }).click();
+  await page.getByRole('button', { name: 'Retry question' }).click();
   await expect(log.getByText('Tutanağı aç ve imzaları incele.')).toBeVisible();
   expect(posts).toBe(2);
 });
@@ -130,7 +164,7 @@ test('missing credentials and navigation during a request leave the saved case i
   await launcher.click();
   await page.getByRole('button', { name: 'Open Barney’s envelope' }).click();
   await launcher.click();
-  await page.getByRole('button', { name: 'Retry AI hint' }).click();
+  await page.getByRole('button', { name: 'Retry question' }).click();
   await expect(page.getByText('Checking the margins…')).toBeVisible();
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Episodes' }).click();
   await expect(page).toHaveURL(/\/episodes$/);

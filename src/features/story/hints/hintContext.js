@@ -2,6 +2,8 @@ import { chapters, claims, exhibits } from '../../../data/investigation.js';
 import { beginCase, firstInvestigation } from '../logic.js';
 
 export const questionLimit = 400;
+export const hintReplyLimit = 800;
+export const hintHistoryLimit = 3;
 
 const chapterHints = {
   signatures: [
@@ -38,18 +40,31 @@ export function hintRequestState(progress, spoilers, level) {
   return { chapter: progress.chapter, evidence: progress.discovered, completed: progress.completed, spoilers, level };
 }
 
+const hasText = (value, limit) => typeof value === 'string' && value.length <= limit && Boolean(value.trim());
+
+function validateHistory(history = []) {
+  if (!Array.isArray(history) || history.length > hintHistoryLimit || history.some((turn) =>
+    !turn || typeof turn !== 'object' || Object.keys(turn).length !== 2 ||
+    !hasText(turn.question, questionLimit) || !hasText(turn.text, hintReplyLimit))) return null;
+  return history.filter(({ question, text }) => [question, text].every((value) =>
+    !containsCredential(value) && !isInstructionOverride(value)))
+    .map(({ question, text }) => ({ question: question.trim(), text: text.trim() }));
+}
+
 export function validateHintRequest(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body) ||
-    Object.keys(body).some((key) => !['chapter', 'evidence', 'completed', 'spoilers', 'level', 'question'].includes(key)) ||
+    Object.keys(body).some((key) => !['chapter', 'evidence', 'completed', 'spoilers', 'level', 'question', 'history'].includes(key)) ||
     typeof body.chapter !== 'string' || !chapters.some(({ id }) => id === body.chapter) ||
     !Array.isArray(body.evidence) || body.evidence.length > Object.keys(exhibits).length ||
     !Array.isArray(body.completed) || body.completed.length > chapters.length ||
     typeof body.spoilers !== 'boolean' || ![1, 2, 3].includes(body.level) ||
-    typeof body.question !== 'string' || body.question.length > questionLimit || !body.question.trim()) return null;
+    !hasText(body.question, questionLimit)) return null;
   const progress = beginCase({ version: firstInvestigation.version, chapter: body.chapter, discovered: body.evidence, completed: body.completed });
   if (progress.chapter !== body.chapter || progress.discovered.length !== body.evidence.length ||
     progress.completed.length !== body.completed.length) return null;
-  return { ...hintRequestState(progress, body.spoilers, body.level), question: body.question.trim() };
+  const history = validateHistory(body.history);
+  if (!history) return null;
+  return { ...hintRequestState(progress, body.spoilers, body.level), question: body.question.trim(), history };
 }
 
 export function reviewedHintRecords(state) {
@@ -61,14 +76,15 @@ export function reviewedHintRecords(state) {
 export function buildHintContext(state) {
   const chapter = chapters.find(({ id }) => id === state.chapter);
   const solved = state.completed.includes(chapter.deduction.id);
+  const unopened = chapter.discover.filter((id) => !state.evidence.includes(id));
   return {
-    chapter: chapter.id, objective: chapter.goal,
+    chapter: chapter.id, objective: chapter.goal, solved,
     evidence: reviewedHintRecords(state).map((id) => ({ id, title: exhibits[id].title, text: exhibits[id].text })),
     completed: chapters.filter(({ deduction }) => state.completed.includes(deduction.id)).map(({ deduction }) => deduction.confirmed),
     interactions: solved ? ['Use the next action in the case file'] :
-      ['Cite reviewed records', 'Check a deduction', ...(chapter.discover.some((id) => !state.evidence.includes(id)) ? ['Inspect unread records'] : []),
+      ['Cite reviewed records', 'Check a deduction', ...unopened.map((id) => exhibits[id].action || 'Inspect ' + exhibits[id].title),
         ...(chapter.timeline ? ['Order recorded events'] : [])],
-    witness: claims[chapter.claim], level: state.level, spoilers: state.spoilers,
+    witness: claims[chapter.claim], level: Math.min(state.level, availableHintLevel(state)),
     source: 'Original fictional case. Television episodes are outside this notebook.',
   };
 }

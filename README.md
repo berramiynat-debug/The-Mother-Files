@@ -15,7 +15,7 @@ An unofficial *How I Met Your Mother* wiki and an original interactive mystery. 
 2. Choose a conclusion and tick **Cite** on the documents that support it. In the timeline chapter, put the recorded events in order as well.
 3. Select **Check deduction**. A correct, supported conclusion unlocks the next chapter or the final decision.
 
-Select **Need a hint?** to open **The Mosby Margins**. Use the guided questions to get a nudge about the current chapter, or type a custom question in **Ask your sibling** and select **Send**.
+Select **Need a hint?** to open **The Mosby Margins**. Pick a guided hint or type a question in **Ask your sibling**. You can ask about an opened record and follow up on the reply in the same chapter.
 
 The **Evidence Board** is a separate archive activity. **Pin to thread** selects a season’s date, episode, or character card. Select all three and choose **Connect the records** to mark that season as connected.
 
@@ -37,7 +37,7 @@ Open the local URL printed by Vite. TVmaze supplies the main archive data. Commu
 Copy `.env.example` to the Git-ignored `.env.local` to configure optional providers. Restart Vite after editing the file.
 
 - **TMDB** supplies supplementary artwork. Set either `TMDB_READ_ACCESS_TOKEN` for a Bearer read token or `TMDB_API_KEY` for a v3 key.
-- **GroqCloud** selects hints for custom notebook questions using `openai/gpt-oss-20b`. Set `GROQ_API_KEY` from a free-plan project. Custom questions and relevant reviewed case context go to Groq. Guided hints and the complete mystery are available without this credential.
+- **GroqCloud** writes replies for The Mosby Margins using `openai/gpt-oss-20b`. Set `GROQ_API_KEY` from a free-plan project. Groq receives the question, up to three recent chat exchanges, and reviewed case context. Guided hints and the complete mystery are available without this credential.
 
 The browser shares archive progress across open tabs on HTTPS and localhost. On supported browsers, the Web Locks API serializes writes so simultaneous actions can save together.
 
@@ -69,7 +69,7 @@ Import this repository into **Vercel** as a Vite project. The build command is `
 | `src/context` | Favorites, clues, story progress, and preferences in localStorage |
 | `src/styles/main.css` | Tailwind theme, shared component styles, and scene effects |
 | `server/tmdb.js` and `api/tmdb.js` | TMDB proxy logic and Vercel function entry point |
-| `server/hints.js` and `api/hints.js` | Groq classification, validation, and request limits |
+| `server/hints.js` and `api/hints.js` | Groq conversation, validation, and request limits |
 | `tests` | Unit and browser checks |
 
 ## Credits
