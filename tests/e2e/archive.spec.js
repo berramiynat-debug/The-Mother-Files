@@ -32,6 +32,60 @@ test('canonical listings, search, pagination, navigation, production refresh, an
   await expect(page.locator('.timeline-entry')).toHaveCount(9);
 });
 
+test('hidden props open in place and save one memory across cards and details', async ({ page }) => {
+  const endpoint = 'https://api.tvmaze.com';
+  const barney = { character: { id: 46417, name: 'Barney Stinson' }, person: { id: 31567, name: 'Neil Patrick Harris' } };
+  const pineapple = { id: 12294, season: 1, number: 10, name: 'The Pineapple Incident' };
+  const fiero = { id: 12323, season: 2, number: 17, name: 'Arrivederci, Fiero' };
+  await page.route(endpoint + '/shows/171/cast', (route) => route.fulfill({ json: [barney] }));
+  await page.route(endpoint + '/shows/171/episodes', (route) => route.fulfill({ json: [pineapple, fiero] }));
+  await page.route(endpoint + '/episodes/12294?embed=show', (route) =>
+    route.fulfill({ json: { ...pineapple, _embedded: { show: { id: 171 } } } }));
+
+  await page.goto('/characters');
+  const tie = page.getByRole('button', { name: 'Inspect the ducky tie' });
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await tie.press('Enter');
+  const tieDialog = page.getByRole('dialog', { name: 'The ducky tie' });
+  await expect(tieDialog.getByRole('button', { name: 'Close' })).toBeFocused();
+  await tieDialog.getByRole('button', { name: 'Check the dress code' }).click();
+  await expect(tieDialog.getByRole('status')).toContainText('Marshall stamped it');
+  await page.keyboard.press('Escape');
+  await expect(tieDialog).toHaveCount(0);
+  await expect(tie).toBeFocused();
+  await expect(page).toHaveURL(/\/characters$/);
+  await page.getByRole('link', { name: /Barney Stinson/ }).click();
+  await expect(tie).toHaveAttribute('data-found', 'true');
+  await expect(page.getByRole('button', { name: 'Suit up' })).toBeVisible();
+
+  await page.setViewportSize({ width: 320, height: 650 });
+  await page.goto('/episodes');
+  await page.getByRole('searchbox', { name: 'Search episodes' }).fill('S02E17');
+  await page.getByRole('button', { name: 'Check the cassette deck' }).click();
+  const cassette = page.getByRole('dialog', { name: 'The Fiero’s stuck cassette' });
+  await expect(cassette).toBeInViewport({ ratio: 1 });
+  await cassette.getByRole('button', { name: 'Try to eject it' }).click();
+  await expect(cassette.getByRole('status')).toHaveText('The eject button clicks. The cassette stays put.');
+  await page.mouse.click(3, 3);
+  await expect(cassette).toHaveCount(0);
+  await expect(page).toHaveURL(/\/episodes$/);
+
+  await page.getByRole('searchbox', { name: 'Search episodes' }).fill('S01E10');
+  await page.getByRole('button', { name: 'Inspect the pineapple' }).click();
+  await page.getByRole('dialog', { name: 'Pineapple incident' }).getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('link', { name: /The Pineapple Incident/ }).click();
+  const fruit = page.getByRole('button', { name: 'Inspect the pineapple' });
+  await expect(fruit).toHaveAttribute('data-found', 'true');
+  await fruit.click();
+  await expect(page.getByRole('dialog', { name: 'Pineapple incident' })).toBeVisible();
+
+  await page.goto('/collection');
+  await expect(page.getByRole('heading', { name: 'The ducky tie', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The Fiero’s stuck cassette', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pineapple incident', exact: true })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Memory collection completion' })).toHaveAttribute('value', '3');
+});
+
 test('TVmaze network failure, retry, loading, and empty states', async ({ page }) => {
   const match = 'https://api.tvmaze.com/shows/171/episodes';
   await page.route(match, (route) => route.abort());
@@ -92,7 +146,7 @@ test('independent tabs preserve concurrent archive updates and reflect a deliber
   }
   await other.getByRole('button', { name: 'Reset local progress' }).click();
   await other.getByRole('button', { name: 'Clear archive data' }).click();
-  await expect(page.getByText('0 / 19')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Memory collection completion' })).toHaveAttribute('value', '0');
 });
 
 test('homepage statistics distinguish loading, unavailable, returned zero and resolved data', async ({ page }) => {

@@ -1,7 +1,8 @@
+import { characterArtifacts, episodeArtifacts } from './wikiArtifacts.js';
+
 export const memories = [
   ['horn', 'The blue French horn', 'The street outside the archive has its own soundtrack.'],
   ['umbrella', 'Yellow umbrella', 'The underside holds a luggage tag stamped “Lost & Found.”'],
-  ['pineapple', 'Pineapple incident', 'Evidence tagged: unusual fruit, ordinary night.'],
   ['swarley', 'Swarley protocol', 'The coffee was right. The name was gloriously wrong.'],
   ['sparkles', 'The mall transmission', 'A disco signal interrupted the dossier.'],
   ['telephone', 'Have you met Ted?', 'The best introductions start with a genuine question.'],
@@ -18,4 +19,6 @@ export const memories = [
   ['photo', 'Corner booth photograph', 'An old print from the corner booth at MacLaren’s.'],
   ['envelope', 'The wax seal', 'Barney marked the envelope “For the Mosby kids.”'],
   ['secret', 'One last seat', 'You saved a seat for Dad. This time, you two got to tell the story.'],
+  ...Array.from(characterArtifacts.values(), ({ id, title, description }) => [id, title, description]),
+  ...Array.from(episodeArtifacts.values(), ({ id, title, description }) => [id, title, description]),
 ].map(([id, title, description]) => ({ id, title, description }));

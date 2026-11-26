@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BackLink, Empty, PageHeading, Picture, SpoilerLock, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
+import { characterArtifacts, episodeArtifacts } from '../data/wikiArtifacts.js';
+import { ArtifactTrigger } from '../features/wiki/ArtifactTrigger.jsx';
 import { Credit, EpisodeCard, Favorite } from '../features/wiki/WikiCards.jsx';
 import { useResource } from '../hooks/useResource.js';
 import { tvmazeService } from '../services/providers/tvmazeService.js';
@@ -44,6 +46,7 @@ export function CharacterDetail() {
   const id = parseId(useParams().id);
   const result = useResource('cast', tvmazeService.characters);
   const character = result.data?.find((row) => row.id === id);
+  const artifact = character && characterArtifacts.get(character.name);
   const { state, unlock } = useArchive();
   const [suit, setSuit] = useState(false);
   return <article className="wrap page">
@@ -59,6 +62,7 @@ export function CharacterDetail() {
               <path d="m120 33 7 7-4 8 6 27-9 16-9-16 7-27-5-8Z" fill="#743743" />
               <path d="m96 10 23 92h-13L73 56l11-9-14-7Zm48 0-23 92h13l33-46-11-9 14-7Z" fill="#29313a" />
             </svg>}
+            {artifact && <ArtifactTrigger key={artifact.id} artifact={artifact} />}
           </div>
           <div><PageHeading eyebrow="Character dossier" title={character.name} description={clueStyle[character.name]} />
             <p>Portrayed by <Link className="text-link" to={'/cast/' + character.actor.id}>{character.actor.name}</Link>.</p>
@@ -101,12 +105,13 @@ export function CastDetail() {
 
 export function EpisodeDetail() {
   const id = parseId(useParams().id);
-  const { state, unlock } = useArchive();
+  const { state } = useArchive();
   const load = useCallback(() => tvmazeService.episode(id), [id]);
   const result = useResource(id || null, load);
   const archive = useResource('episodes', tvmazeService.episodes);
   const row = result.data;
   const sealed = row && !state.spoilers && protectedEpisode(row);
+  const artifact = row && !sealed && episodeArtifacts.get(episodeCode(row));
   const season = row?.season;
   const episode = row?.number;
   const loadImage = useCallback(() => tmdbService('episode', { season, episode }), [season, episode]);
@@ -124,7 +129,7 @@ export function EpisodeDetail() {
         <div className="panel episode-summary">
           <dl className="detail-meta"><div><dt>First aired</dt><dd>{row.date || 'Unknown'}</dd></div><div><dt>Runtime</dt><dd>{row.runtime ? row.runtime + ' min' : 'Unknown'}</dd></div><div><dt>TVmaze rating</dt><dd>{row.rating ?? 'Unrated'}</dd></div></dl>
           <h2>Synopsis</h2><p>{row.summary || 'No synopsis on record.'}</p>
-          {row.season === 1 && row.number === 10 && <button className="quiet-secret" onClick={() => unlock('pineapple')}>Inspect the pineapple</button>}
+          {artifact && <ArtifactTrigger key={artifact.id} artifact={artifact} showLabel />}
           <Credit row={row}>{still ? 'Record by TVmaze · Still by TMDB' : undefined}</Credit>
         </div>
       </>}

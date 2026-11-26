@@ -91,7 +91,7 @@ test('a first-time player can complete the case and recover every ending without
   await expect(page.getByRole('heading', { name: 'One last seat' })).toBeVisible();
   await inspect(page, 'Reset local progress');
   await inspect(page, 'Clear archive data');
-  await expect(page.getByText('0 / 19')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Memory collection completion' })).toHaveAttribute('value', '0');
 });
 
 test('pub activities and the sibling role remain usable and restorable', async ({ page }) => {
