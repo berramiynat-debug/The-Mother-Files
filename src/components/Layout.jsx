@@ -2,7 +2,7 @@ import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Archive, ChevronDown, FolderOpen, Menu, Volume2, VolumeX, X } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigationType } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
-import Intro from './Intro.jsx';
+import Intro, { UmbrellaOpening } from './Intro.jsx';
 
 const links = [
   ['/', 'Home'], ['/characters', 'Characters'], ['/seasons', 'Seasons'], ['/episodes', 'Episodes'],
@@ -93,7 +93,6 @@ export default function Layout() {
         <div className="wrap footer-inner">
           <div><Link to="/" className="brand"><img src="/playbook.svg" alt="" width="33" height="33" /><span>Legen<strong>diary</strong>!</span></Link><p>An unofficial How I Met Your Mother fan archive.</p></div>
           <nav aria-label="Footer links">
-            <button onClick={() => set('spoilers', !state.spoilers)} aria-pressed={state.spoilers}>Spoilers {state.spoilers ? 'on' : 'off'}</button>
             <button onClick={() => setIntro(true)}>Replay intro</button>
             <Link to="/sources">Sources &amp; credits</Link>
             <Link to="/about">About</Link>
@@ -102,6 +101,7 @@ export default function Layout() {
       </footer>
     </div>
     {intro && <Intro />}
+    <UmbrellaOpening />
     {notice && location.pathname !== '/pub' && <div className={inInvestigation ? 'sr-only' : 'toast'} role="status"><Archive size={19} /> {notice}</div>}
   </>;
 }

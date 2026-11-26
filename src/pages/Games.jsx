@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Clapperboard, Fingerprint, Gamepad2, NotebookPen, Quote, Timer } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Empty, PageHeading, SpoilerLock, Status } from '../components/UI.jsx';
+import { Empty, PageHeading, SpoilerLock, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { protectedEpisode, protectedName, quoteIsSafe } from '../services/normalizers/records.js';
@@ -23,10 +23,12 @@ const catalog = [
 function EpisodeQuiz() {
   const { state } = useArchive();
   const resource = useResource('episodes', tvmazeService.episodes);
-  const [season, setSeason] = useState('');
+  const [selectedSeason, setSeason] = useState('');
   const [difficulty, setDifficulty] = useState('Standard');
   const [run, setRun] = useState(() => Math.random());
   const replay = () => setRun(Math.random());
+  const seasons = [...new Set((resource.data ?? []).filter((row) => state.spoilers || !protectedEpisode(row)).map((row) => row.season))];
+  const season = seasons.includes(Number(selectedSeason)) ? selectedSeason : '';
   const questions = useMemo(() => {
     const eligible = (resource.data ?? []).filter((row) => state.spoilers || !protectedEpisode(row));
     const pool = eligible.filter((row) => !season || row.season === Number(season));
@@ -43,7 +45,6 @@ function EpisodeQuiz() {
     }), 10, seededRandom(run));
   }, [resource.data, state.spoilers, season, difficulty, run]);
 
-  const seasons = [...new Set((resource.data ?? []).filter((row) => state.spoilers || !protectedEpisode(row)).map((row) => row.season))];
   return <><div className="button-row game-filter"><label className="field-label">Season <select value={season} onChange={(event) => { setSeason(event.target.value); replay(); }}>
     <option value="">All available seasons</option>{seasons.map((value) => <option key={value} value={value}>Season {value}</option>)}</select></label>
     <label className="field-label">Difficulty <select value={difficulty} onChange={(event) => { setDifficulty(event.target.value); replay(); }}>
@@ -110,7 +111,9 @@ export default function Games() {
   const Screen = Object.hasOwn(screens, game) ? screens[game] : null;
   return <section className="wrap page">
     {meta && <Link className="back-link" to="/games">‹ All games</Link>}
-    <PageHeading eyebrow="Archive arcade" title={meta?.[2] ?? 'The game room.'} description={meta?.[3] ?? 'I tried to make a case file with no games in it. I shouldn’t have asked Barney to proofread.'} />
+    <PageHeading eyebrow="Archive arcade" title={meta?.[2] ?? 'The game room.'} description={meta?.[3] ?? 'I tried to make a case file with no games in it. I shouldn’t have asked Barney to proofread.'}>
+      {(game === 'episode' || game === 'narrator') && <SpoilerToggle />}
+    </PageHeading>
     {!Screen && <p className="mb-5">Looking for the missing Playbook page? <Link className="text-link" to="/story">Play the main mystery</Link>.</p>}
     {Screen ? <Screen key={game} /> : <div className="game-catalog grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {catalog.map(([id, Icon, title, description]) => <Link className="game-tile" key={id} to={'/games?game=' + id}><Icon size={27} /><h2>{title}</h2><p>{description}</p><span><Gamepad2 size={16} /> Play</span></Link>)}

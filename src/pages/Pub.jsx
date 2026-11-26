@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Briefcase, Coffee, Mail, Music, NotebookPen, Phone, Sofa } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PageHeading } from '../components/UI.jsx';
+import { PageHeading, SpoilerToggle } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { himymCharacterService } from '../services/providers/himymCharacterService.js';
 import { maclarensService } from '../services/providers/maclarensService.js';
@@ -25,19 +25,25 @@ function Telephone() {
 
 function Jukebox() {
   const { chime, state, set } = useArchive();
-  const [result, setResult] = useState({ text: '', loading: false });
+  const [result, setResult] = useState({ loading: false });
   const play = async () => {
-    setResult({ loading: true, text: '' });
+    setResult({ loading: true });
     chime();
     try {
       const row = await himymCharacterService.randomQuote();
-      setResult({ loading: false, text: quoteIsSafe(row, state.spoilers) ? '“' + row.line + '” — ' + row.author + ' · ' + row.source : 'This track has no episode date and is sealed in spoiler-safe mode.' });
-    } catch { setResult({ loading: false, text: 'The jukebox could not recover a line. Choose another track.' }); }
+      setResult({ loading: false, row });
+    } catch { setResult({ loading: false, error: true }); }
   };
+  const { row } = result;
   return <><p>I saved a few voices in the jukebox. Pick a track for a chime and a short line from the community archive.</p>
     <div className="button-row"><button className="button primary" disabled={result.loading} onClick={play}>{result.loading ? 'Tuning…' : 'Play a random track'}</button>
-      <button className="button secondary" aria-pressed={state.sound} onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? 'Mute jukebox' : 'Enable chime'}</button></div>
-    {result.text && <p className="note" aria-live="polite">{result.text}</p>}</>;
+      <button className="button secondary" aria-pressed={state.sound} onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? 'Mute jukebox' : 'Enable chime'}</button>
+      <SpoilerToggle />
+    </div>
+    {row && <p className="note" aria-live="polite">{quoteIsSafe(row, state.spoilers)
+      ? <>“{row.line}” — {row.author} · {row.source}</>
+      : 'This track is sealed in spoiler-safe mode.'}</p>}
+    {result.error && <p className="note" role="status">The jukebox could not recover a line. Choose another track.</p>}</>;
 }
 
 function Coaster() {

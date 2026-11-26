@@ -144,6 +144,31 @@ test('spoiler safe default, direct URL lock, and opt-in', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Under seal' })).toBeVisible();
 });
 
+test('the Jukebox applies the current spoiler setting to the selected track', async ({ page }) => {
+  const response = Promise.withResolvers();
+  await page.route('https://himym-api.vercel.app/api/quotes', async (route) => {
+    await response.promise;
+    await route.fulfill({ json: { quotes: 'Test-only unclassified track.', author: 'Ted Mosby' } });
+  });
+  await page.goto('/pub');
+  await page.getByRole('group', { name: 'Objects in MacLaren’s' }).getByRole('button', { name: 'Jukebox' }).click();
+  const jukebox = page.locator('#pub-inspector');
+  try {
+    await jukebox.getByRole('button', { name: 'Spoilers off' }).click();
+    await jukebox.getByRole('button', { name: 'Play a random track' }).click();
+    await jukebox.getByRole('button', { name: 'Spoilers on' }).click();
+  } finally {
+    response.resolve();
+  }
+  await expect(jukebox.getByText('This track is sealed in spoiler-safe mode.')).toBeVisible();
+  const quote = jukebox.getByText(/Test-only unclassified track/);
+  await expect(quote).toHaveCount(0);
+  await jukebox.getByRole('button', { name: 'Spoilers off' }).click();
+  await expect(quote).toBeVisible();
+  await page.goto('/episodes');
+  await expect(page.getByRole('main').getByRole('button', { name: 'Spoilers on' })).toBeVisible();
+});
+
 test('live character aliases, canon conflict, and Case File 3355', async ({ page }) => {
   await page.goto('/characters/46417');
   await page.getByRole('button', { name: 'Swarley', exact: true }).click();

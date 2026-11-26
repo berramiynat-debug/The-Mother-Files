@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Archive, Database, FileText, GitBranch, LockKeyhole, Radio, RotateCcw, Server, Umbrella } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PageHeading, Picture, Status } from '../components/UI.jsx';
+import { PageHeading, Picture, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { memories } from '../data/memories.js';
 import { useResource } from '../hooks/useResource.js';
@@ -60,7 +60,8 @@ export function Collection() {
       return <article className={'memory ' + (found ? 'found' : 'locked')} key={item.id}>{found ? <FileText size={19} /> : <LockKeyhole size={18} />}
         <div><h2>{found ? item.title : 'Sealed memory'}</h2><p>{found ? item.description : 'Explore the archive to recover this file.'}</p></div></article>;
     })}</div>
-    <section className="panel memory-wall"><p className="eyebrow">Quote detective</p><h2>Memory wall</h2>
+    <section className="panel memory-wall">
+      <div className="panel-heading"><div><p className="eyebrow">Quote detective</p><h2>Memory wall</h2></div>{state.wall.length > 0 && <SpoilerToggle />}</div>
       {state.wall.length ? <ul>{state.wall.filter((item) => state.spoilers || (item.season && item.season < 8)).map((item) => <li key={item.id}>{item.author} · Voice print recovered</li>)}
         {!state.spoilers && state.wall.some((item) => !item.season || item.season >= 8) && <li>Unclassified and late-season voices under seal</li>}</ul>
         : <p>Correct answers from <Link className="text-link" to="/games?game=narrator">Quote Detective</Link> appear here.</p>}
@@ -105,7 +106,7 @@ export function Sources() {
       })}
     </div>
     <section className="panel">
-      <p className="eyebrow">Field-level comparison</p><h2>Cast attribution</h2>
+      <div className="panel-heading"><div><p className="eyebrow">Field-level comparison</p><h2>Cast attribution</h2></div><SpoilerToggle /></div>
       <Status resource={integrity}>{integrity.data?.identityHealthy ? <div className="table-scroll"><table><thead><tr><th scope="col">Character</th><th scope="col">Canonical actor · TVmaze</th><th scope="col">Community record</th></tr></thead>
         <tbody>{integrity.data.rows.filter((row) => state.spoilers || !/the mother/i.test(row.name)).map((row) => <tr key={row.name}><td>{row.name}</td><td>{row.actor}</td><td>{row.status}</td></tr>)}</tbody></table></div>
         : <><p>The community provider did not respond. TVmaze cast credits remain available.</p><button className="button secondary" onClick={integrity.retry}>Retry comparison</button></>}</Status>

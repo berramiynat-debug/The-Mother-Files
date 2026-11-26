@@ -1,5 +1,6 @@
 import { BookOpen, Clapperboard, Dice5, Fingerprint, Music, Play, Umbrella, Users, Wine } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { SpoilerToggle } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { tvmazeService } from '../services/providers/tvmazeService.js';
@@ -52,7 +53,10 @@ export default function Home() {
     </section>
     <section className="wrap home-archive">
       <div className="section-heading"><div><p className="eyebrow">The archive</p><h2>Explore the files.</h2></div>
-        <button className="button secondary" disabled={!safeEpisodes.length} onClick={() => navigate('/episodes/' + safeEpisodes[Math.floor(Math.random() * safeEpisodes.length)].id)}><Dice5 size={17} /> Random episode</button>
+        <div className="heading-actions">
+          <SpoilerToggle />
+          <button className="button secondary" disabled={!safeEpisodes.length} onClick={() => navigate('/episodes/' + safeEpisodes[Math.floor(Math.random() * safeEpisodes.length)].id)}><Dice5 size={17} /> Random episode</button>
+        </div>
       </div>
       <p className="series-intro"><strong>{show.data?.name ?? 'How I Met Your Mother'}</strong> is a comedy about Ted Mosby telling his children how he met their mother. The story follows his search for love in New York with his friends Marshall, Lily, Barney and Robin.
         {show.data?.url && <>{' '}<a className="text-link" href={show.data.url}>Series record on TVmaze</a></>}</p>

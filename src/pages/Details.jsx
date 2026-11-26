@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { BackLink, Empty, PageHeading, Picture, SpoilerLock, Status } from '../components/UI.jsx';
+import { BackLink, Empty, PageHeading, Picture, SpoilerLock, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { Credit, EpisodeCard, Favorite } from '../features/wiki/WikiCards.jsx';
 import { useResource } from '../hooks/useResource.js';
@@ -47,7 +47,7 @@ export function CharacterDetail() {
   const { state, unlock } = useArchive();
   const [suit, setSuit] = useState(false);
   return <article className="wrap page">
-    <BackLink to="/characters">Character dossiers</BackLink>
+    <div className="record-controls"><BackLink to="/characters">Character dossiers</BackLink><SpoilerToggle /></div>
     <Status resource={result}>
       {!character ? <Empty title="Dossier not found" /> : protectedName(character.name) && !state.spoilers ? <SpoilerLock /> : <>
         <div className={'detail-hero ' + (suit && character.name === 'Barney Stinson' ? 'suited' : '')}>
@@ -81,9 +81,10 @@ export function CastDetail() {
   const actor = useResource(id || null, load);
   const cast = useResource('cast', tvmazeService.characters);
   const credits = useResource('credits', getCredits);
-  const roles = (cast.data ?? []).filter((row) => row.actor.id === id);
+  const roles = (cast.data ?? []).filter((row) => row.actor.id === id && (state.spoilers || !protectedName(row.name)));
   const picture = credits.data?.cast?.find((row) => namesMatch(actor.data?.name, row.name));
-  return <article className="wrap page"><BackLink to="/cast">The cast</BackLink>
+  return <article className="wrap page">
+    <div className="record-controls"><BackLink to="/cast">The cast</BackLink><SpoilerToggle /></div>
     <Status resource={actor}>
       {!actor.data ? <Empty title="Actor not found" /> : !state.spoilers && protectedName(actor.data.name) ? <SpoilerLock /> :
         <div className="detail-hero">
@@ -114,7 +115,8 @@ export function EpisodeDetail() {
   const previous = at > 0 ? archive.data[at - 1] : null;
   const next = at >= 0 ? archive.data[at + 1] : null;
   const still = tmdbImage(images.data?.stills?.[0], 'w1280');
-  return <article className="wrap page"><BackLink to="/episodes">Episode archive</BackLink>
+  return <article className="wrap page">
+    <div className="record-controls"><BackLink to="/episodes">Episode archive</BackLink><SpoilerToggle /></div>
     <Status resource={result}>
       {!row ? <Empty title="Episode not found" /> : sealed ? <><PageHeading eyebrow={episodeCode(row)} title="Sealed episode." /><SpoilerLock /></> : <>
         <PageHeading eyebrow={'TVmaze · ' + episodeCode(row)} title={row.name}><Favorite id={row.id} /></PageHeading>
@@ -146,7 +148,8 @@ export function SeasonDetail() {
   const tmdb = useResource(safeImages && season ? id : null, load);
   const poster = tmdbImage(tmdb.data?.poster, 'w500');
   const rows = (episodes.data ?? []).filter((row) => row.season === id).map((row) => protectEpisode(row, state.spoilers));
-  return <article className="wrap page"><BackLink to="/seasons">The timeline</BackLink>
+  return <article className="wrap page">
+    <div className="record-controls"><BackLink to="/seasons">The timeline</BackLink><SpoilerToggle /></div>
     <Status resource={seasons}>
       {!season ? <Empty title="Season not found" /> : <>
         <div className="detail-hero">

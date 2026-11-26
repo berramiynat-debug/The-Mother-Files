@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dice5, LockKeyhole } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Empty, PageHeading, Picture, SearchField, Status } from '../components/UI.jsx';
+import { Empty, PageHeading, Picture, SearchField, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { EpisodeCard, PersonCard } from '../features/wiki/WikiCards.jsx';
 import { useResource } from '../hooks/useResource.js';
@@ -19,7 +19,7 @@ function PeopleListing({ mode, title, description }) {
   const [search, setSearch] = useState('');
   const rows = (cast.data ?? []).filter((row) => (state.spoilers || !protectedName(row.name)) && matches(row.name + ' ' + row.actor.name, search));
   return <section className="wrap page">
-    <PageHeading eyebrow="Series archive" title={title} description={description} />
+    <PageHeading eyebrow="Series archive" title={title} description={description}><SpoilerToggle /></PageHeading>
     <div className="filter-bar"><SearchField label={'Search ' + mode} value={search} onChange={setSearch} placeholder={'Search ' + mode + '…'} /><p>{cast.data && rows.length + ' files'}</p></div>
     <Status resource={cast}>
       {rows.length ? <div className="people-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -41,7 +41,7 @@ export function Seasons() {
   const seasons = useResource('seasons', tvmazeService.seasons);
   const { state, unlock } = useArchive();
   return <section className="wrap page">
-    <PageHeading eyebrow="Series archive" title="The timeline." description="I remember most of these nights. For the actual dates, trust the timeline." />
+    <PageHeading eyebrow="Series archive" title="The timeline." description="I remember most of these nights. For the actual dates, trust the timeline."><SpoilerToggle /></PageHeading>
     <Status resource={seasons}>
       {seasons.data?.length ? <div className="timeline">
         {[...seasons.data].sort((a, b) => a.number - b.number).map((row) => <article className="timeline-entry" key={row.id}>
@@ -78,7 +78,10 @@ export function Episodes() {
   const change = (setter) => (value) => { setter(value); setLimit(12); };
   return <section className="wrap page">
     <PageHeading eyebrow="Series archive" title="Episode archive." description="Find the night you’re thinking of by title, season, or the detail you remember. I’m curious which ones you’ll put in your favorites.">
-      <button className="button secondary" disabled={!random.length} onClick={() => navigate('/episodes/' + random[Math.floor(Math.random() * random.length)].id)}><Dice5 size={18} /> Random episode</button>
+      <div className="heading-actions">
+        <SpoilerToggle />
+        <button className="button secondary" disabled={!random.length} onClick={() => navigate('/episodes/' + random[Math.floor(Math.random() * random.length)].id)}><Dice5 size={18} /> Random episode</button>
+      </div>
     </PageHeading>
     <div className="filter-bar episode-filters">
       <SearchField label="Search episodes" value={search} onChange={change(setSearch)} placeholder="Search titles, summaries, or S01E01…" />

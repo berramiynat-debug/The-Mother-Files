@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Empty, PageHeading, SearchField, SpoilerLock, Status } from '../components/UI.jsx';
+import { Empty, PageHeading, SearchField, SpoilerLock, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { himymCharacterService } from '../services/providers/himymCharacterService.js';
@@ -17,7 +17,10 @@ export default function Quotes() {
 
   return <section className="wrap page">
     <PageHeading eyebrow="Audio transcript archive" title="Recovered lines." description="I remember most of the punch lines. Use the transcript to check who actually said them.">
-      <Link className="button secondary" to="/games?game=narrator">Play Quote Detective</Link>
+      <div className="heading-actions">
+        <SpoilerToggle />
+        <Link className="button secondary" to="/games?game=narrator">Play Quote Detective</Link>
+      </div>
     </PageHeading>
     <Status resource={resource}>
       {!state.spoilers ? <SpoilerLock>The Character API serves random quotations without episode dates. Allow spoilers to browse those unclassified lines.</SpoilerLock> : <>

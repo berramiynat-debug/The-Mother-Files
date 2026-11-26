@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar, Clapperboard, GitBranch, Link2, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PageHeading, Empty, Status } from '../components/UI.jsx';
+import { PageHeading, Empty, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { useResource } from '../hooks/useResource.js';
 import { himymArchiveService } from '../services/providers/himymArchiveService.js';
@@ -25,7 +25,9 @@ export default function Evidence() {
   }
 
   return <section className="wrap page">
-    <PageHeading eyebrow="Investigation workspace" title="The evidence board." description="Kids, pin a date, an episode, and a witness to the thread. If I start explaining why I bought the corkboard, you have my permission to keep going." />
+    <PageHeading eyebrow="Investigation workspace" title="The evidence board." description="Kids, pin a date, an episode, and a witness to the thread. If I start explaining why I bought the corkboard, you have my permission to keep going.">
+      <SpoilerToggle />
+    </PageHeading>
     <Status resource={result}>
       {!row ? <Empty title="No evidence to pin" /> : <>
         <label className="field-label game-filter">Open a season file <select value={season} onChange={(event) => { setSeason(Number(event.target.value)); setSelected([]); setNote(''); }}>

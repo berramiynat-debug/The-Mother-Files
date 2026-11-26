@@ -42,6 +42,25 @@ test('identity game always includes the hidden alias', async ({ page }) => {
   await expect(page.getByText(/coffee cup just made/)).toBeVisible();
 });
 
+test('Slap Bet difficulty stays editable during and between attempts', async ({ page }) => {
+  await page.goto('/games?game=reaction');
+  const game = page.locator('.reaction');
+  const difficulty = game.getByLabel('Difficulty');
+  await game.getByRole('button', { name: 'Start meter' }).click();
+  await difficulty.selectOption('Legendary');
+  await expect(game.locator('.target')).toHaveAttribute('style', /width: 11%/);
+  await game.getByRole('button', { name: 'Catch signal' }).click();
+  await expect(game.getByText('1 / 5 attempts')).toBeVisible();
+  const points = game.getByText(/points$/);
+  const earned = await points.textContent();
+  await difficulty.selectOption('Casual');
+  await expect(points).toHaveText(earned);
+  await expect(game.getByText('1 / 5 attempts')).toBeVisible();
+  await game.getByRole('button', { name: 'Start next attempt' }).click();
+  await game.getByRole('button', { name: 'Catch signal' }).click();
+  await expect(game.getByText('2 / 5 attempts')).toBeVisible();
+});
+
 test('live quote integration uses the Character API for the archive and detective game', async ({ page }) => {
   // Invented fixture lines represent network shapes only. Production uses live GET requests.
   const characters = ['Ted Mosby', 'Barney Stinson', 'Marshall Eriksen', 'Lily Aldrin', 'Robin Scherbatsky'];

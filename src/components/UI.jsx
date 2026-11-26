@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileQuestion, LockKeyhole, RotateCw, Search, X } from 'lucide-react';
+import { FileQuestion, LockKeyhole, LockKeyholeOpen, RotateCw, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 
@@ -37,6 +37,15 @@ export function SearchField({ value, onChange, placeholder, label = 'Search' }) 
   return <label className="search-field"><Search size={17} aria-hidden="true" /><span className="sr-only">{label}</span>
     <input type="search" placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />
   </label>;
+}
+
+export function SpoilerToggle() {
+  const { state: { spoilers }, set } = useArchive();
+  const Icon = spoilers ? LockKeyholeOpen : LockKeyhole;
+  return <button type="button" className="button secondary spoiler-toggle" aria-pressed={spoilers}
+    onClick={() => set('spoilers', (enabled) => !enabled)}>
+    <Icon size={16} aria-hidden="true" /> Spoilers {spoilers ? 'on' : 'off'}
+  </button>;
 }
 
 export function SpoilerLock({ children }) {

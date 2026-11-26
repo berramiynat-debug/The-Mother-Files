@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { BookMarked, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 import { Modal } from './UI.jsx';
@@ -15,6 +15,21 @@ const frames = [
 
 const sceneNames = ['Living room', 'Archive scan', 'The pause', 'Legendary', 'The missing page', 'Your turn'];
 const lastStep = frames.length - 1;
+
+const raindrops = [
+  ['6%', '24%', '0ms'], ['17%', '53%', '110ms'], ['27%', '9%', '220ms'],
+  ['48%', '4%', '70ms'], ['68%', '17%', '140ms'], ['83%', '39%', '270ms'],
+  ['93%', '12%', '180ms'], ['72%', '62%', '300ms'],
+];
+
+export function UmbrellaOpening() {
+  return <div className="umbrella-opening" aria-hidden="true">
+    <div className="opening-scene">
+      {raindrops.map(([left, top, delay]) => <span key={left} className="opening-rain" style={{ left, top, animationDelay: delay }} />)}
+      <div className="opening-umbrella"><div className="opening-canopy" /></div>
+    </div>
+  </div>;
+}
 
 export default function Intro() {
   const { finishIntro, state, set, chime } = useArchive();
@@ -39,7 +54,7 @@ export default function Intro() {
   }
   return <Modal title="The Memory Glitch" className="intro" onClose={finishIntro}>
     <div className="intro-inner">
-      <img className="intro-playbook" src="/playbook.svg" alt="" width="70" height="70" />
+      <div className="intro-playbook" aria-hidden="true"><BookMarked size={38} strokeWidth={1.8} /></div>
       <p className="eyebrow">Dad’s archive · Living room, 2030</p>
       <div aria-live="polite" aria-atomic="true">
         <div key={step} className="intro-frame"><h2>{title}</h2>{description && <p>{description}</p>}</div>
