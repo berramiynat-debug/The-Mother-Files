@@ -4,16 +4,23 @@
 
 An unofficial *How I Met Your Mother* wiki and an original interactive mystery. Browse the TVmaze archive or play **The Play That Never Happened** as one of Ted’s kids. A page called **The Fifth Alibi** has gone missing from Barney’s Playbook. Compare signed documents, reconstruct the evening, and check Ted’s account before deciding where the page belongs.
 
-- [Hosted site](https://legendiary.vercel.app)
-- [Play the mystery](https://legendiary.vercel.app/story)
+- [Live wiki](https://legendiary.vercel.app)
+- [The Mystery](https://legendiary.vercel.app/story)
 - [Provider verification and attribution](docs/providers.md)
 - [Rubric and instructor walkthrough](docs/demo.md)
+
+## Explore the wiki
+
+On your first visit, choose **Let's see the diary** in the opening to enter the wiki home page. Browse **Characters**, **Seasons**, and **Episodes** from the menu. In **Episodes**, you can search by title, summary, or episode code, filter by season, and save favorites.
+
+Select an object on a character or episode card to reveal an Easter egg. Click the floating book to open **Memory Collection**, then drag or swipe to turn its pages. The previous and next controls also work with the keyboard. You can move the floating book with a mouse or touch, and the browser remembers its position.
 
 ## Play the mystery
 
 1. Open **The Mystery** and read the documents for the current chapter.
 2. Choose a conclusion and tick **Cite** on the documents that support it. In the timeline chapter, put the recorded events in order as well.
-3. Select **Check deduction**. A correct, supported conclusion unlocks the next chapter or the final decision.
+3. Select **Check deduction**. The feedback names missing required citations. You can also cite reviewed records marked **Optional reference**.
+4. After a correct deduction, select **Continue** in the first three chapters. Chapter 4 opens the ending choices. Five specific keepsakes unlock an extra ending.
 
 Select **Need a hint?** to open **The Mosby Margins**. Pick a guided hint or type a question in **Ask your sibling**. You can ask about an opened record and follow up on the reply in the same chapter.
 
@@ -66,7 +73,8 @@ Import this repository into **Vercel** as a Vite project. The build command is `
 | `src/services/normalizers` | Schema checks, field provenance, comparison, and spoiler helpers |
 | `src/hooks/useResource.js` | Reusable loading, retry, and stale-response protection |
 | `src/features` and `src/data` | Wiki cards, games, case rules, and original narrative |
-| `src/context` | Favorites, clues, story progress, and preferences in localStorage |
+| `src/components/MemoryBookCompanion.jsx` and `src/features/collection` | Draggable collection shortcut and paged memory book |
+| `src/context` | Favorites, clues, story progress, book position, and preferences in localStorage |
 | `src/styles/main.css` | Tailwind theme, shared component styles, and scene effects |
 | `server/tmdb.js` and `api/tmdb.js` | TMDB proxy logic and Vercel function entry point |
 | `server/hints.js` and `api/hints.js` | Groq conversation, validation, and request limits |

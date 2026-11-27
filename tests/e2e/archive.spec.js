@@ -260,7 +260,7 @@ test('homepage statistics distinguish loading, unavailable, returned zero and re
   await expect(stat('Series premiere')).toHaveText('2005');
   await expect(page.getByRole('link', { name: 'Series record on TVmaze' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Random episode' })).toBeDisabled();
-  await expect(page.getByRole('link', { name: 'Play the mystery' })).toBeEnabled();
+  await expect(page.getByRole('link', { name: 'Browse the archive' })).toBeEnabled();
   expect(shows).toBe(1);
 
   await page.unroute(base + '/episodes');

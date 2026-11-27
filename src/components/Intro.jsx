@@ -71,8 +71,7 @@ export default function Intro() {
       </div>
       <div className="intro-controls">
         <button className="icon-button" aria-label={state.sound ? 'Mute sound' : 'Enable sound'} onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? <Volume2 /> : <VolumeX />}</button>
-        <button className="button secondary" onClick={finishIntro}>{step === lastStep ? 'Enter the archive' : 'Skip intro'}</button>
-        <Link className="button primary" to="/story" onClick={finishIntro}>Play the mystery</Link>
+        <Link className="button primary" to="/" onClick={finishIntro}>{"Let's see the diary"}</Link>
       </div>
     </div>
   </Modal>;

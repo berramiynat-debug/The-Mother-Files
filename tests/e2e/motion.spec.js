@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('the intro can pause, jump to a scene, and resume without skipping the story', async ({ page }) => {
+test('the intro can pause, jump to a scene, resume, and open the wiki home', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.route('**/playbook.svg', (route) => route.abort());
   await page.clock.install();
@@ -15,8 +15,11 @@ test('the intro can pause, jump to a scene, and resume without skipping the stor
   await intro.getByRole('button', { name: 'Resume intro' }).click();
   await page.clock.fastForward(1250);
   await expect(intro.getByRole('heading', { name: 'A page has gone missing.' })).toBeVisible();
-  await intro.getByRole('link', { name: 'Play the mystery' }).click();
-  await expect(page.getByRole('button', { name: 'Open Barney’s envelope' })).toBeVisible();
+  await intro.getByRole('link', { name: "Let's see the diary" }).click();
+  await expect(intro).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('link', { name: 'Browse the archive' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to investigation' })).toHaveCount(0);
 });
 
 test('the umbrella opens on each document load for returning visitors', async ({ page }) => {

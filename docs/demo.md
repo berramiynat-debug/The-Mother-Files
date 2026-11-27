@@ -35,7 +35,7 @@ The browser suite checks concurrent archive updates across tabs, direct episode 
 
 ## A four-minute walkthrough
 
-1. Open the home page, replay or skip the intro, then select **Episodes**. Search for `S01E01`, favorite **Pilot**, open it, and refresh its direct URL.
+1. Select **Let's see the diary** in the intro, then open **Episodes**. Search for `S01E01`, favorite **Pilot**, open it, and refresh its direct URL.
 2. Open **Characters**, then **Barney Stinson**. File **Swarley**, use **Suit up**, and show the unlocked memories in **Collection**.
 3. Open **Sources & credits** and show the **Marshall Eriksen** actor conflict. Enter `3355` in the restricted file field to show the API flow, optional provider status, and normalized ownership.
 4. Open **The Pub**, find the sealed envelope, and try the suitcase or telephone. Show the **Evidence Board** and pin all three records. On **Games**, play one clue in **Guess the Episode** and use **Space** for **Slap Bet**.

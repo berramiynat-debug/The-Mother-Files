@@ -20,7 +20,8 @@ test('a first-time player can complete the case and recover every ending without
   await page.route('**/api/hints', (route) => route.abort());
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.getByRole('dialog').getByRole('link', { name: 'Play the mystery' }).click();
+  await page.getByRole('dialog').getByRole('link', { name: "Let's see the diary" }).click();
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'The Mystery' }).click();
   await choose(page, 'Five people signed.');
   await check(page);
   await expect(page.getByText('Inspect the relevant records before submitting.')).toBeVisible();
@@ -107,7 +108,8 @@ test('a first-time player can complete the case and recover every ending without
 test('pub activities and the sibling role remain usable and restorable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/pub');
-  await inspect(page, 'Enter the archive');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   const phone = page.locator('.scene-spot[aria-label="Telephone"]');
   await phone.press('Enter');
   await expect(phone).toHaveAttribute('aria-pressed', 'true');
@@ -138,10 +140,10 @@ test('pub activities and the sibling role remain usable and restorable', async (
 test('return to investigation stays visible and restores the saved chapter', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await inspect(page, 'Enter the archive');
+  await page.getByRole('dialog').getByRole('link', { name: "Let's see the diary" }).click();
   const returnLink = page.getByRole('link', { name: 'Back to investigation' });
   await expect(returnLink).toHaveCount(0);
-  await page.getByRole('link', { name: 'Play the mystery' }).click();
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'The Mystery' }).click();
   const envelope = page.getByRole('button', { name: 'Open Barney’s envelope' });
   await expect(envelope).toBeVisible();
   await expect(returnLink).toHaveCount(0);

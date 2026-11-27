@@ -36,8 +36,7 @@ export default function Home() {
         <p className="eyebrow hero-case-title">{caseTitle}</p>
         <p className="hero-copy">{casePremise}</p>
         <div className="hero-actions flex flex-wrap gap-3">
-          <Link className="button primary" to="/story"><Fingerprint size={18} /> Play the mystery</Link>
-          <Link className="button hero-outline" to="/episodes"><BookOpen size={17} /> Browse the archive</Link>
+          <Link className="button primary" to="/episodes"><BookOpen size={17} /> Browse the archive</Link>
         </div>
         <button className="replay" onClick={() => setIntro(true)}><Play size={13} fill="currentColor" /> Replay opening sequence</button>
       </div>
