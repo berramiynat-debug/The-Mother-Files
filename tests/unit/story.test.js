@@ -42,6 +42,19 @@ describe('Playbook case rules', () => {
     expect(update(read, { ...answer, order: ['opening', 'filing', 'arrival'] }).completed).toEqual(['headcount', 'arrival']);
   });
 
+  it('allows a reviewed comparison record alongside the required authorship citations', () => {
+    const timeline = update(solve(firstInvestigation, chapters[0]), { type: 'advance' });
+    const annotation = update(solve(timeline, chapters[1]), { type: 'advance' });
+    const read = inspect(annotation, ['draft', 'note']);
+    const answer = { type: 'deduce', choice: 'lily', citations: ['draft', 'note', 'custody'] };
+    for (const citations of [['draft', 'custody'], [...answer.citations, 'reservation'], [...answer.citations, 'note']]) {
+      expect(assessDeduction(read, { ...answer, citations })).toMatch(/Cite the records/);
+    }
+    const solved = update(read, answer);
+    expect(solved.completed).toEqual(['headcount', 'arrival', 'authorship']);
+    expect(update(solved, { type: 'advance' }).chapter).toBe('verdict');
+  });
+
   it('checks the final deduction and keepsakes, preserves choices on reload, and clears only case progress on restart', () => {
     let progress = firstInvestigation;
     for (const chapter of chapters) {

@@ -39,8 +39,11 @@ export function assessDeduction(progress, answer) {
   const { deduction } = chapter;
   if (!deduction.sources.every((id) => progress.discovered.includes(id))) return 'Inspect the relevant records before submitting.';
   if (answer.choice !== deduction.correct) return deduction.wrong;
-  if (!Array.isArray(answer.citations) || answer.citations.length !== deduction.sources.length ||
-    !deduction.sources.every((id) => answer.citations.includes(id))) {
+  const { citations } = answer;
+  const available = new Set([...chapter.discover, ...deduction.sources, ...(chapter.compare ?? [])]);
+  if (!Array.isArray(citations) || new Set(citations).size !== citations.length ||
+    !deduction.sources.every((id) => citations.includes(id)) ||
+    citations.some((id) => !available.has(id) || !progress.discovered.includes(id))) {
     return 'Cite the records that establish each part of your conclusion.';
   }
   if (chapter.order && !sameOrder(answer.order, chapter.order)) return 'Compare the three timestamps and put the earliest event first.';

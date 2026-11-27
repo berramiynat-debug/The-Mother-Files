@@ -45,6 +45,8 @@ test('a first-time player can complete the case and recover every ending without
   await page.getByRole('button', { name: 'Continue to a line in the margin' }).click();
   await inspect(page, 'Inspect The bar’s filing slip');
   await inspect(page, 'Inspect Lily’s private annotation');
+  await expect(page.getByText('Optional reference · Marshall Eriksen', { exact: true })).toBeVisible();
+  await cite(page, 'Cite Marshall’s custody sheet');
   await cite(page, 'Cite The bar’s filing slip');
   await choose(page, 'Lily added the last line to Barney’s draft.');
   await check(page);

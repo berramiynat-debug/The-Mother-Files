@@ -36,7 +36,7 @@ function EvidenceRecords({ chapter, progress, citations, setCitations, inspect }
             aria-label={exhibit.action ?? 'Inspect ' + exhibit.title} onClick={() => inspect(id)}>
             {exhibit.action ?? 'Inspect record'}
           </button>}
-          {read && <p className="credit">Case record · {witnesses[exhibit.witness]}</p>}
+          {read && <p className="credit">{chapter.deduction.sources.includes(id) ? 'Case record' : 'Optional reference'} · {witnesses[exhibit.witness]}</p>}
         </article>;
       })}
     </div>
