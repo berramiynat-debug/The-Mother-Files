@@ -7,6 +7,46 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test('the floating book keeps its place across routes and opens the memory collection on click', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 1280, height: 850 });
+  await page.goto('/');
+  const book = page.getByRole('link', { name: 'Memory collection', exact: true });
+  await expect(book).toBeVisible();
+  await expect(page.locator('.umbrella-opening')).toBeHidden();
+  await expect(book.locator('img')).toHaveCSS('animation-name', 'book-companion-float');
+  const bounds = await book.boundingBox();
+  expect(bounds.x).toBeLessThan(24);
+  expect(bounds.y + bounds.height).toBeGreaterThan(826);
+
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(760, 410, { steps: 10 });
+  await expect(book).toHaveAttribute('data-dragging', 'true');
+  expect((await book.boundingBox()).x).toBeGreaterThan(700);
+  await page.mouse.up();
+  await expect(book).toHaveAttribute('data-dragging', 'false');
+  await expect(page).toHaveURL(/\/$/);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('mother-files-v1')).bookPosition?.x)).toBeGreaterThan(.55);
+  const position = await book.getAttribute('style');
+
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Episodes' }).click();
+  await expect(page).toHaveURL(/\/episodes$/);
+  await expect(book).toHaveAttribute('style', position);
+  await page.reload();
+  await expect(book).toHaveAttribute('style', position);
+  await expect(page.locator('.umbrella-opening')).toBeHidden();
+
+  const moved = await book.boundingBox();
+  await book.press('ArrowUp');
+  await expect.poll(async () => (await book.boundingBox()).y).toBeLessThan(moved.y - 24);
+  await expect(page).toHaveURL(/\/episodes$/);
+  await book.click();
+  await expect(page).toHaveURL(/\/collection$/);
+  await expect(page.getByRole('region', { name: 'Memory book' })).toBeVisible();
+  await expect(book).toHaveAttribute('aria-current', 'page');
+});
+
 test('canonical listings, search, pagination, navigation, production refresh, and favorites', async ({ page }) => {
   await page.goto('/episodes');
   await expect(page.getByText('208 episodes', { exact: true })).toBeVisible();

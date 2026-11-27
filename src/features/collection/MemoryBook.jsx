@@ -157,11 +157,11 @@ export default function MemoryBook({ unlocked }) {
     </div>
     <div className="book-controls">
       <button type="button" className="button secondary" aria-label="Previous page" aria-disabled={start === 0} onClick={() => go(-1)}>
-        <ChevronLeft size={18} aria-hidden="true" /> Previous
+        <ChevronLeft size={18} aria-hidden="true" /> <span>Previous</span>
       </button>
       <p className="book-page-count" aria-live="polite">{pageLabel}</p>
       <button type="button" className="button secondary" aria-label="Next page" aria-disabled={end >= pages.length} onClick={() => go(1)}>
-        Next <ChevronRight size={18} aria-hidden="true" />
+        <span>Next</span> <ChevronRight size={18} aria-hidden="true" />
       </button>
     </div>
     <p className="book-instructions" id={instructionId}>Drag or swipe a page to turn it.</p>

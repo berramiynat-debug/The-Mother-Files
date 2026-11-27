@@ -3,6 +3,7 @@ import { Archive, ChevronDown, FolderOpen, Menu, Volume2, VolumeX, X } from 'luc
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigationType } from 'react-router-dom';
 import { useArchive } from '../context/archiveContext.js';
 import Intro, { UmbrellaOpening } from './Intro.jsx';
+import MemoryBookCompanion from './MemoryBookCompanion.jsx';
 
 const links = [
   ['/', 'Home'], ['/characters', 'Characters'], ['/seasons', 'Seasons'], ['/episodes', 'Episodes'],
@@ -77,12 +78,12 @@ export default function Layout() {
             </div>
           </nav>
           <div className="nav-actions flex items-center">
-            <NavLink to="/collection" className="icon-button" aria-label="Memory collection" title="Memory collection"><Archive size={18} /></NavLink>
             <button className="icon-button sound-toggle" aria-label={state.sound ? 'Mute sound' : 'Enable sound'} title="Sound preference" onClick={() => { set('sound', !state.sound); chime(!state.sound); }}>{state.sound ? <Volume2 size={18} /> : <VolumeX size={18} />}</button>
             <button className="icon-button hamburger" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} onClick={() => { setMenuPath(menu ? '' : key); setMorePath(''); }}>{menu ? <X size={22} /> : <Menu size={22} />}</button>
           </div>
         </div>
       </header>
+      <MemoryBookCompanion />
       {state.story && !inInvestigation && <div className="investigation-return">
         <div className="wrap">
           <Link className="investigation-return-link" to="/story"><FolderOpen size={17} aria-hidden="true" /> Back to investigation</Link>

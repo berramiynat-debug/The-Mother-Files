@@ -146,8 +146,9 @@
   .collection-progress { flex: auto; min-width: 0; }
   .book-page { min-height: 405px; padding: 17px 14px 12px; }
 }
-@media (max-width: 400px) {
-  .book-controls .button { padding-inline: 7px; gap: 4px; font-size: .8rem; }
-  .book-controls .button svg { width: 14px; }
+@media (max-width: 460px) {
+  .book-controls { justify-content: center; }
+  .book-controls .button { width: 44px; padding: 0; flex: none; }
+  .book-controls .button span { display: none; }
   .book-page-count { font-size: .8rem; }
 }

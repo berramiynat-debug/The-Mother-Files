@@ -4,7 +4,7 @@ import { memories } from '../data/memories.js';
 import { archiveLegacyCase } from '../features/story/logic.js';
 
 const storageKey = 'mother-files-v1';
-const defaults = { unlocked: [], favorites: [], sound: false, spoilers: false, introSeen: false, story: null, aliases: [], connections: [], wall: [], pubObjects: [] };
+const defaults = { unlocked: [], favorites: [], sound: false, spoilers: false, introSeen: false, story: null, aliases: [], connections: [], wall: [], pubObjects: [], bookPosition: null };
 function readArchive() {
   try {
     const value = JSON.parse(localStorage.getItem(storageKey));
@@ -16,6 +16,9 @@ function readArchive() {
     state.wall = state.wall.filter((entry) => entry && typeof entry.author === 'string' &&
       (typeof entry.id === 'string' || Number.isSafeInteger(entry.id)) &&
       (entry.season == null || Number.isFinite(entry.season)));
+    const point = state.bookPosition;
+    state.bookPosition = [point?.x, point?.y].every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
+      ? { x: point.x, y: point.y } : null;
     for (const key of ['sound', 'spoilers', 'introSeen']) state[key] = state[key] === true;
     return archiveLegacyCase(state);
   } catch { return null; }

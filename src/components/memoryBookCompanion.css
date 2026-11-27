@@ -1,0 +1,75 @@
+.book-companion-dock {
+  --companion-size: clamp(54px, 5vw, 64px);
+  position: fixed;
+  z-index: 40;
+  inset: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+.book-companion {
+  position: absolute;
+  left: calc((100% - var(--companion-size)) * var(--companion-x));
+  top: calc((100% - var(--companion-size)) * var(--companion-y));
+  display: grid;
+  width: var(--companion-size);
+  height: var(--companion-size);
+  place-items: center;
+  border: 1px solid #b98659;
+  border-radius: 19px;
+  background: radial-gradient(ellipse at 32% 22%, #573631, #271c22 75%);
+  box-shadow: 0 5px 14px #05080bc2, inset 0 0 0 2px #20161b;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.book-companion::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  right: 8px;
+  width: 9px;
+  aspect-ratio: 1;
+  background: #f8d584;
+  clip-path: polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%);
+  pointer-events: none;
+  animation: book-companion-glint 6s ease-in-out infinite;
+}
+.book-companion-tilt {
+  display: grid;
+  width: 82%;
+  place-items: center;
+  transform: rotate(-9deg);
+  transition: transform .2s ease;
+  pointer-events: none;
+}
+.book-companion img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 3px #100a0a96);
+  animation: book-companion-float 6s ease-in-out infinite;
+}
+.book-companion:hover, .book-companion:focus-visible, .book-companion[aria-current=page] {
+  border-color: #f2c677;
+  box-shadow: 0 6px 20px #100a0cc2, inset 0 0 0 2px #55312f;
+}
+.book-companion:is(:hover, :focus-visible) .book-companion-tilt { transform: translateY(-2px) rotate(-3deg) scale(1.08); }
+.book-companion[data-dragging=true] { cursor: grabbing; }
+.book-companion[data-dragging=true] .book-companion-tilt { transform: translateY(-3px) rotate(8deg) scale(1.08); }
+.book-companion[data-dragging=true] img { animation-play-state: paused; }
+@keyframes book-companion-float {
+  0%, 15%, 64%, 100% { transform: translateY(0) rotate(0); }
+  36% { transform: translateY(-4px) rotate(7deg); }
+  49% { transform: translateY(-1px) rotate(-2deg); }
+}
+@keyframes book-companion-glint {
+  0%, 17%, 63%, 100% { opacity: .5; transform: scale(.75); }
+  36% { opacity: 1; transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-companion img, .book-companion::after { animation: none; }
+  .book-companion:is(:hover, :focus-visible, [data-dragging=true]) .book-companion-tilt { transform: rotate(-9deg); }
+}
