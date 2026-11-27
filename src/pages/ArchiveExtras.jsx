@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Archive, Database, FileText, GitBranch, LockKeyhole, Radio, RotateCcw, Server, Umbrella } from 'lucide-react';
+import { Archive, Database, GitBranch, Radio, RotateCcw, Server, Umbrella } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeading, Picture, SpoilerToggle, Status } from '../components/UI.jsx';
 import { useArchive } from '../context/archiveContext.js';
 import { memories } from '../data/memories.js';
+import MemoryBook from '../features/collection/MemoryBook.jsx';
 import { useResource } from '../hooks/useResource.js';
 import { himymArchiveService } from '../services/providers/himymArchiveService.js';
 import { tmdbImage, tmdbService } from '../services/providers/tmdbService.js';
@@ -50,16 +51,15 @@ export function Collection() {
   const { state, reset } = useArchive();
   const [confirm, setConfirm] = useState(false);
   const cast = useResource('integrity', himymArchiveService.integrity);
-  const count = memories.filter((item) => state.unlocked.includes(item.id)).length;
+  const unlocked = new Set(state.unlocked);
+  const count = memories.filter(({ id }) => unlocked.has(id)).length;
   const pct = Math.round(count / memories.length * 100);
-  return <section className="wrap page">
-    <PageHeading eyebrow="Local archive" title="Recovered memories." description="This is your folder now, kids. Keep the clues you found. Mine’s the one with six separate tabs for rain." />
-    <div className="panel completion"><p><strong>{count} / {memories.length}</strong> recovered <span>{pct}%</span></p><progress aria-label="Memory collection completion" value={count} max={memories.length} /></div>
-    <div className="memory-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{memories.map((item) => {
-      const found = state.unlocked.includes(item.id);
-      return <article className={'memory ' + (found ? 'found' : 'locked')} key={item.id}>{found ? <FileText size={19} /> : <LockKeyhole size={18} />}
-        <div><h2>{found ? item.title : 'Sealed memory'}</h2><p>{found ? item.description : 'Explore the archive to recover this file.'}</p></div></article>;
-    })}</div>
+  return <section className="wrap page collection-page">
+    <PageHeading eyebrow="Local archive" title="Recovered memories.">
+      <div className="collection-progress"><p><span><strong>{count} / {memories.length}</strong> recovered</span><strong>{pct}%</strong></p>
+        <progress aria-label="Memory collection completion" value={count} max={memories.length} /></div>
+    </PageHeading>
+    <MemoryBook unlocked={unlocked} />
     <section className="panel memory-wall">
       <div className="panel-heading"><div><p className="eyebrow">Quote detective</p><h2>Memory wall</h2></div>{state.wall.length > 0 && <SpoilerToggle />}</div>
       {state.wall.length ? <ul>{state.wall.filter((item) => state.spoilers || (item.season && item.season < 8)).map((item) => <li key={item.id}>{item.author} · Voice print recovered</li>)}

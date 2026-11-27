@@ -398,15 +398,6 @@ progress::-webkit-progress-value { background: var(--gold); }
 .evidence-note .button[aria-pressed=true] { color: #441821; background: #e7bcbc; }
 .evidence-note :focus-visible { outline-color: var(--color-burgundy); }
 .thread-secret { position: absolute; right: 11px; bottom: 7px; padding: 8px; color: #ffc2ad; }
-.completion { margin-bottom: 18px; }
-.completion p { display: flex; align-items: baseline; gap: 7px; }
-.completion p strong { color: var(--gold); }
-.completion p span { margin-left: auto; }
-.memory { display: flex; align-items: flex-start; gap: 11px; padding: 15px; border: 1px solid var(--line); border-radius: 7px; background: #111d26; color: var(--muted); }
-.memory svg { flex: none; margin-top: 4px; }
-.memory.found { border-color: #715d3b; color: var(--gold); }
-.memory h2 { font-size: 1.2rem; font-weight: 650; }
-.memory p { color: var(--muted); font-size: .86rem; margin-top: 5px; }
 .memory-wall ul { margin-top: 10px; color: var(--muted); }
 .reset-row { @apply mt-[22px] flex flex-wrap items-center gap-2.5; }
 .source-grid .panel { margin-top: 0; }

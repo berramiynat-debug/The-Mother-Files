@@ -79,11 +79,57 @@ test('hidden props open in place and save one memory across cards and details', 
   await fruit.click();
   await expect(page.getByRole('dialog', { name: 'Pineapple incident' })).toBeVisible();
 
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/collection');
+  const next = page.getByRole('button', { name: 'Next page' });
+  for (let turn = 0; turn < 3; turn++) await next.click();
   await expect(page.getByRole('heading', { name: 'The ducky tie', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'The Fiero’s stuck cassette', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Pineapple incident', exact: true })).toBeVisible();
+  await next.click();
+  await expect(page.getByRole('heading', { name: 'The Fiero’s stuck cassette', exact: true })).toBeVisible();
   await expect(page.getByRole('progressbar', { name: 'Memory collection completion' })).toHaveAttribute('value', '3');
+});
+
+test('the memory book follows a drag, cancels a short pull, and turns with the keyboard', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/collection');
+  const book = page.getByRole('region', { name: 'Memory book' });
+  const spread = book.locator('.book-spread');
+  const folios = book.locator('.book-page-count');
+  await expect(folios).toHaveText('Pages 1–2 of 10');
+  await expect(book.getByRole('button', { name: 'Previous page' })).toBeDisabled();
+  await expect(page.locator('.umbrella-opening')).toBeHidden();
+
+  await spread.scrollIntoViewIfNeeded();
+  const bounds = await spread.boundingBox();
+  const right = bounds.x + bounds.width * .88;
+  const left = bounds.x + bounds.width * .12;
+  const y = bounds.y + bounds.height / 2;
+  await page.mouse.move(right, y);
+  await page.mouse.down();
+  await page.mouse.move(right - 22, y, { steps: 4 });
+  await expect(spread.locator('.book-leaf')).toHaveAttribute('data-phase', 'dragging');
+  await page.mouse.up();
+  await expect(spread.locator('.book-leaf')).toHaveCount(0);
+  await expect(folios).toHaveText('Pages 1–2 of 10');
+
+  await page.mouse.move(right, y);
+  await page.mouse.down();
+  await page.mouse.move(right - bounds.width * .24, y, { steps: 8 });
+  await expect(spread.locator('.book-leaf')).toHaveAttribute('data-direction', 'forward');
+  await page.mouse.up();
+  await expect(folios).toHaveText('Pages 3–4 of 10');
+  await page.mouse.move(left, y);
+  await page.mouse.down();
+  await page.mouse.move(left + bounds.width * .24, y, { steps: 8 });
+  await expect(spread.locator('.book-leaf')).toHaveAttribute('data-direction', 'back');
+  await page.mouse.up();
+  await expect(folios).toHaveText('Pages 1–2 of 10');
+
+  await book.press('ArrowRight');
+  await expect(folios).toHaveText('Pages 3–4 of 10');
+  await book.press('ArrowLeft');
+  await expect(folios).toHaveText('Pages 1–2 of 10');
 });
 
 test('TVmaze network failure, retry, loading, and empty states', async ({ page }) => {

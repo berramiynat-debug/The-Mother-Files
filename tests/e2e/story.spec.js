@@ -88,6 +88,8 @@ test('a first-time player can complete the case and recover every ending without
   await page.reload();
   await expect(page.getByRole('heading', { name: 'One last seat' })).toBeVisible();
   await page.goto('/collection');
+  await inspect(page, 'Next page');
+  await inspect(page, 'Next page');
   await expect(page.getByRole('heading', { name: 'One last seat' })).toBeVisible();
   await inspect(page, 'Reset local progress');
   await inspect(page, 'Clear archive data');
