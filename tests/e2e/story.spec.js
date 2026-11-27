@@ -73,11 +73,15 @@ test('a first-time player can complete the case and recover every ending without
   await expect(page.getByRole('button', { name: 'Save one last seat' })).toBeDisabled();
   await page.getByRole('link', { name: 'Go to the rainy street' }).click();
   await inspect(page, 'Inspect the yellow umbrella');
+  await expect(page.getByText('Memory recovered · Yellow umbrella', { exact: true })).toBeVisible();
   await inspect(page, 'Inspect the blue French horn');
+  await expect(page.getByText('Memory recovered · The blue French horn', { exact: true })).toBeVisible();
   await page.goto('/pub');
   await inspect(page, 'Inspect the booth photograph');
+  await expect(page.getByRole('button', { name: 'Booth photograph recovered' })).toBeDisabled();
   await page.goto('/evidence');
   await inspect(page, 'Pull the loose thread');
+  await expect(page.getByText('Memory recovered · The red thread', { exact: true })).toBeVisible();
   for (let index = 0; index < 3; index++) await page.getByRole('button', { name: 'Pin to thread' }).first().click();
   await inspect(page, 'Connect the records');
   await expect(page.getByText(/connection is saved/)).toBeVisible();
