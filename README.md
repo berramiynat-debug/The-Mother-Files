@@ -6,6 +6,15 @@ Legendiary! is an unofficial *How I Met Your Mother* wiki and an original intera
 
 [Live wiki](https://legendiary.vercel.app/) · [GitHub repository](https://github.com/berramiynat-debug/The-Mother-Files) · [Grading walkthrough](docs/demo.md) · [Provider verification and credits](docs/providers.md)
 
+## APIs used
+
+- **TVmaze API** supplies the series overview, season and episode listings, episode details, and character and cast records. It also powers the Evidence Board and Guess the Episode. The browser makes `GET` requests directly to `api.tvmaze.com`.
+- **HIMYM Character API** supplies community nicknames and occupations, plus random quotes for Quotes, The Unreliable Narrator, and the pub jukebox. The browser calls `GET /api/characters` and `GET /api/quotes` on `himym-api.vercel.app`.
+- **The Movie Database (TMDB) API v3** supplies optional series backdrops, cast portraits, season art, and episode stills. The site’s `GET /api/tmdb` endpoint calls TMDB’s `/3/tv/1100` endpoints.
+- **GroqCloud Chat Completions API** supplies optional replies to player questions and follow-ups in The Mosby Margins. The site’s `POST /api/hints` endpoint calls Groq with the `openai/gpt-oss-20b` model.
+
+The **MacLaren’s Pub API** and **HIMYM Archive API** appear in the provider report as reviewed reference projects. [Provider verification and credits](docs/providers.md)
+
 ## Site features
 
 Choose **Let's see the diary** on the opening screen to reach the wiki homepage. The main navigation links to the catalog, the pub, and the games.
