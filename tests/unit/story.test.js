@@ -25,7 +25,7 @@ describe('Playbook case rules', () => {
     const read = inspect(first, ['custody', 'aliases', 'reservation']);
     expect(update(read, { type: 'inspect', id: 'custody' })).toBe(read);
     expect(assessDeduction(read, { ...answer, choice: 'five' })).toMatch(/Count the people/);
-    expect(assessDeduction(read, { ...answer, citations: ['custody', 'reservation'] })).toMatch(/Cite the records/);
+    expect(assessDeduction(read, { ...answer, citations: ['custody', 'reservation'] })).toContain('Cite Barney’s signed correction');
     const solved = update(read, answer);
     expect(solved.completed).toEqual(['headcount']);
     expect(update(solved, answer)).toBe(solved);
@@ -47,8 +47,11 @@ describe('Playbook case rules', () => {
     const annotation = update(solve(timeline, chapters[1]), { type: 'advance' });
     const read = inspect(annotation, ['draft', 'note']);
     const answer = { type: 'deduce', choice: 'lily', citations: ['draft', 'note', 'custody'] };
-    for (const citations of [['draft', 'custody'], [...answer.citations, 'reservation'], [...answer.citations, 'note']]) {
-      expect(assessDeduction(read, { ...answer, citations })).toMatch(/Cite the records/);
+    expect(assessDeduction(read, { ...answer, citations: ['note'] })).toBe(
+      'Tick “Cite The bar’s filing slip”, then select Check deduction.',
+    );
+    for (const citations of [[...answer.citations, 'reservation'], [...answer.citations, 'note']]) {
+      expect(assessDeduction(read, { ...answer, citations })).toMatch(/Select the supporting records/);
     }
     const solved = update(read, answer);
     expect(solved.completed).toEqual(['headcount', 'arrival', 'authorship']);

@@ -62,9 +62,10 @@ export function CaseScene({ chapter, progress, inspect, dispatch, onIncorrect })
 
   if (solved) return <p className="case-found" role="status"><Check size={19} aria-hidden="true" /> {deduction.confirmed}</p>;
   return <>
-    <EvidenceRecords chapter={chapter} progress={progress} citations={citations} setCitations={setCitations} inspect={inspect} />
+    <EvidenceRecords chapter={chapter} progress={progress} citations={citations} inspect={inspect}
+      setCitations={(next) => { setCitations(next); setFeedback(''); }} />
     <WitnessRecording chapter={chapter} />
-    <form onSubmit={check}>
+    <form onSubmit={check} onChange={() => setFeedback('')}>
       {chapter.timeline && <fieldset className="case-choices">
         <legend>Put the events in order</legend>
         <div className="case-timeline">

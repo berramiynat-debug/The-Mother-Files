@@ -46,12 +46,14 @@ test('a first-time player can complete the case and recover every ending without
   await inspect(page, 'Inspect The bar’s filing slip');
   await inspect(page, 'Inspect Lily’s private annotation');
   await expect(page.getByText('Optional reference · Marshall Eriksen', { exact: true })).toBeVisible();
-  await cite(page, 'Cite Marshall’s custody sheet');
-  await cite(page, 'Cite The bar’s filing slip');
+  await cite(page, 'Cite Lily’s private annotation');
   await choose(page, 'Lily added the last line to Barney’s draft.');
   await check(page);
-  await expect(page.getByText(/Cite the records that establish/)).toBeVisible();
-  await cite(page, 'Cite Lily’s private annotation');
+  const citationReminder = page.getByText('Tick “Cite The bar’s filing slip”, then select Check deduction.', { exact: true });
+  await expect(citationReminder).toBeVisible();
+  await cite(page, 'Cite The bar’s filing slip');
+  await expect(citationReminder).toBeHidden();
+  await cite(page, 'Cite Marshall’s custody sheet');
   await check(page);
   await page.getByRole('button', { name: 'Continue to what never happened' }).click();
   await inspect(page, 'Inspect Signed withdrawal slip');

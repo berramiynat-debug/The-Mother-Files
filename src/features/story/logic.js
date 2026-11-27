@@ -1,4 +1,4 @@
-import { chapters, endings, roles } from '../../data/investigation.js';
+import { chapters, endings, exhibits, roles } from '../../data/investigation.js';
 
 export const firstInvestigation = {
   version: 2, chapter: chapters[0].id, role: 'questions', discovered: [], completed: [], ending: '',
@@ -8,6 +8,7 @@ export const secretMemories = ['umbrella', 'photo', 'envelope', 'string', 'horn'
 export const hasKeepsakes = (unlocked) => secretMemories.every((id) => unlocked.includes(id));
 const sameOrder = (values, expected) => Array.isArray(values) && values.length === expected.length &&
   expected.every((id, index) => id === values[index]);
+const citationList = new Intl.ListFormat('en');
 
 export function archiveLegacyCase(state) {
   const old = state.story;
@@ -42,9 +43,13 @@ export function assessDeduction(progress, answer) {
   const { citations } = answer;
   const available = new Set([...chapter.discover, ...deduction.sources, ...(chapter.compare ?? [])]);
   if (!Array.isArray(citations) || new Set(citations).size !== citations.length ||
-    !deduction.sources.every((id) => citations.includes(id)) ||
     citations.some((id) => !available.has(id) || !progress.discovered.includes(id))) {
-    return 'Cite the records that establish each part of your conclusion.';
+    return 'Select the supporting records for this chapter and check your deduction again.';
+  }
+  const missing = deduction.sources.filter((id) => !citations.includes(id));
+  if (missing.length) {
+    const labels = citationList.format(missing.map((id) => `“Cite ${exhibits[id].title}”`));
+    return `Tick ${labels}, then select Check deduction.`;
   }
   if (chapter.order && !sameOrder(answer.order, chapter.order)) return 'Compare the three timestamps and put the earliest event first.';
   return '';
